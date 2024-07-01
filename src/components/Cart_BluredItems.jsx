@@ -1,7 +1,7 @@
 import React from "react";
 
-import { useData } from "../../parts/Memory.jsx";
-import Item from "./Cart_Item.jsx";
+import { useData } from "../parts/Memory.jsx";
+import Item from "./cart/Cart_Item.jsx";
 
 export default function Cart_BluredItems() {
   const catalog = useData().catalog;

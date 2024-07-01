@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 import { db, storage } from "./Base";
 
+import { useNavigate } from "react-router-dom";
 import { collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, listAll } from "firebase/storage";
+import { GiMailShirt } from "react-icons/gi";
 
 // Create the context
 const DataContext = createContext();
@@ -23,12 +25,15 @@ export const Memory = ({ children }) => {
     newspaper: false,
     email: "email",
     uid: "x",
-    cart: [{ id: 0, quantity: 1 }],
+    cart: [],
+    inPayment: [],
   });
+
   const key = useRef("");
   const catalogKey = useRef();
   const uid = useRef(localStorage.getItem("uid"));
   const freeIdsRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadProfile();
@@ -304,6 +309,97 @@ export const Memory = ({ children }) => {
     loadCatalog();
   }
 
+  function addToLocalCart(id, quantity) {
+    let prevCart = JSON.parse(localStorage.getItem("cart"));
+    let newCart = [];
+
+    if (prevCart) {
+      let notAdded = true;
+      newCart = prevCart.map((product) => {
+        if (product.id === id) {
+          product.quantity = product.quantity + quantity;
+          notAdded = false;
+          return product;
+        } else {
+          return product;
+        }
+      });
+      if (notAdded) [(newCart = [...newCart, { id: id, quantity: quantity }])];
+    } else {
+      newCart = [{ id: id, quantity: quantity }];
+    }
+
+    if (newCart.length) {
+      newCart = newCart.filter((product) => {
+        if (product.quantity === 0) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(newCart));
+  }
+
+  function refreshCatalog() {
+    //for refresh in cart when changing localStorage value it doesn't update form
+    loadCatalog();
+  }
+
+  async function addToPayment(items) {
+    await updateProfile("inPayment", items);
+
+    navigate("/payment-delivery");
+  }
+
+  async function addOrderToProfile(newState) {
+    await loadProfile();
+    await loadCatalog();
+
+    if (key.current === "") {
+      console.log("You have to sing up");
+      return;
+    }
+
+    if (newState) {
+      updateProfile("cart", []);
+    }
+
+    const profileRef = doc(db, "users", key.current);
+    let profileArr = (await getDoc(profileRef)).data();
+    await setDoc(profileRef, { ...profileArr, orders: [...(profileArr.orders || []), profileArr.openOrder], openOrder: "" }); //delete open order
+
+    const orderRef = doc(db, "orders", profileArr.openOrder);
+    let orderArr = (await getDoc(orderRef)).data();
+    await setDoc(orderRef, { ...orderArr, state: newState ? "success" : "canceled" });
+
+    loadProfile();
+    loadCatalog();
+  }
+
+  async function setOpenOrder(orderId) {
+    if (key.current === "") {
+      console.log("You have to sing up");
+      return;
+    }
+
+    const dataRef = doc(db, "users", key.current);
+    const profileArr = (await getDoc(dataRef)).data();
+
+    if (profileArr.openOrder !== "" && profileArr.openOrder !== undefined) {
+      /* const orderRef = doc(db, "orders", profileArr.openOrder);
+      await updateDoc(orderRef, { state: "overwrited"});
+      console.log("Delete unfinished order"); */
+      await addOrderToProfile(false);
+    }
+
+    await setDoc(dataRef, { ...profileArr, openOrder: orderId });
+
+    loadProfile(); //need to load Profile because product Id and quantity is located on profile
+    loadCatalog();
+  }
+
   const contextValue = {
     catalog,
     addToCatalog,
@@ -315,6 +411,11 @@ export const Memory = ({ children }) => {
     profile,
     updateProfile,
     addToCart,
+    addToLocalCart,
+    refreshCatalog,
+    addToPayment,
+    addOrderToProfile,
+    setOpenOrder,
   };
 
   return <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>;

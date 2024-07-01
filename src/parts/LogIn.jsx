@@ -163,6 +163,7 @@ export default function LogIn(props) {
         email: verifiedEmail,
         newspaper: false,
         cart: [],
+        inPayment: [],
       });
       console.log("CREATING NEW PROFILE");
     } else {

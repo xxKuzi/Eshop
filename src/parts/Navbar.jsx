@@ -8,17 +8,36 @@ import { CgProfile } from "react-icons/cg";
 import { useData } from "../parts/Memory.jsx";
 
 function Navbar() {
-  const { profile } = useData();
+  const { profile, catalog } = useData();
   const { editor, nickname, uid, cart } = profile;
+  const [cartCount, setCartCount] = useState(0);
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    function calculateCart() {
+      let number = 0;
+      if (logged) {
+        if (cart.length > 0) {
+          number = cart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+      } else {
+        let unLoggedCart = JSON.parse(localStorage.getItem("cart"));
+        if (unLoggedCart !== null) {
+          number = unLoggedCart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+      }
+
+      return number;
+    }
+
+    setCartCount(calculateCart());
+  }, [catalog, logged]);
 
   return (
     <div className="flex justify-between bg-gray-100 shadow-md">
       <div className="ml-5 flex w-64 items-center">
         <a href="/">
-          <img className="h-20" src="logo2.png" />
+          <img className="h-20" src="logo2.png" alt="Logo" />
         </a>
       </div>
       <div
@@ -34,12 +53,11 @@ function Navbar() {
         {editor && <p className="mr-5 flex flex-col font-bold">Editor Mode</p>}
         <a className="group relative mr-5 flex flex-col items-center " href="/cart">
           <BsCart3 className="z scale-75 duration-150 group-hover:translate-y-2 group-hover:scale-100" size="40" />
-          <div className="absolute left-7 top-0 flex  items-center justify-center duration-150  group-hover:translate-x-[-16px] group-hover:translate-y-[7px] ">
+          <div className="absolute left-7 top-0 flex items-center justify-center duration-150 group-hover:translate-x-[-16px] group-hover:translate-y-[7px]">
             <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-red-600">
-              <p className="w-8   text-center text-xs font-bold text-white">{uid === "x" ? 0 : cart.reduce((total, item) => total + item.quantity, 0)}</p>
+              <p className="w-8 text-center text-xs font-bold text-white">{cartCount}</p>
             </div>
           </div>
-
           <p className="text-center font-bold duration-150 group-hover:translate-y-4 group-hover:text-transparent">košík</p>
         </a>
         <a className="group flex w-16 flex-col items-center" href="/account">
@@ -52,7 +70,7 @@ function Navbar() {
 }
 
 const NavbarIcon = ({ icon, href, text = "Produkty", width = "short" }) => {
-  let widthPalette = {
+  const widthPalette = {
     short: "w-[90px]",
     medium: "w-[105px]",
     long: "w-[115px]",

@@ -11,7 +11,7 @@ export default function Products_Card({ price = 399, name = "Brýle", images = [
           <p className="text-xl font-bold">{name}</p>
           <p className="mt-2">{price}Kč</p>
         </a>
-        <button className="button__positive  button button__small mt-4 text-white" onClick={() => (logged ? handleAddToCart() : (window.location.href = "/cart"))}>
+        <button className="button__positive  button button__small mt-4 text-white" onClick={() => handleAddToCart()}>
           přidat do košíku
         </button>
       </div>

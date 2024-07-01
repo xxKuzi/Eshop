@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useData } from "../parts/Memory";
 import DevProducts from "./DevProducts";
 import DevImages from "./DevImages.jsx";
+import DevOrders from "./DevOrders.jsx";
 
 export default function Dev() {
   const { profile } = useData();
@@ -16,7 +17,7 @@ export default function Dev() {
       <p>Editor {editor.toString()}</p>
       {!editor && <input value={text} className="rounded-md border-2 bg-gray-100" onChange={(e) => (setText(e.target.value), e.target.value === "tm" ? (setText(""), logged ? updateProfile("editor", true) : null) : null)} type="text"></input>}
       {editor && (
-        <div>
+        <div className="flex flex-col">
           <div>
             <button className="mt-5 rounded-xl bg-sky-700 px-4 py-2 text-white hover:bg-sky-800 sm:px-8 sm:py-3" onClick={() => updateProfile("editor", false)}>
               Disable Editor Mode
@@ -25,6 +26,7 @@ export default function Dev() {
 
           <DevProducts className="mb-5" setSelected={(value) => setSelected(value)} selected={selected} />
           <DevImages selected={selected} />
+          <DevOrders />
         </div>
       )}
     </div>

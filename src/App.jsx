@@ -10,6 +10,12 @@ import Contact from "./pages/Contact.jsx";
 import ProductPage from "./pages/ProductPage.jsx";
 import Cart from "./pages/Cart.jsx";
 import Dev from "./dev/Dev.jsx";
+import Delivery from "./pages/payment/Delivery.jsx";
+import Summary from "./pages/payment/Summary.jsx";
+import Details from "./pages/payment/Details.jsx";
+import Success from "./components/payment/PaymentSuccess.jsx";
+import Cancel from "./components/payment/PaymentCancel.jsx";
+
 import { Routes, Route } from "react-router-dom";
 import { Memory, useData } from "./parts/Memory.jsx";
 
@@ -29,6 +35,11 @@ function App() {
         {catalog.map((item) => {
           return <Route key={item.id} path={"/product-" + item.id} element={<ProductPage data={item} />} />;
         })}
+        <Route path="/payment-delivery" element={<Delivery />} />
+        <Route path="/payment-details" element={<Details />} />
+        <Route path="/payment-summary" element={<Summary />} />
+        <Route path="/payment-success" element={<Success />} />
+        <Route path="/payment-cancel" element={<Cancel />} />
       </Routes>
     </>
   );

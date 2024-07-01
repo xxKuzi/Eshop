@@ -3,31 +3,9 @@ import { useData } from "../parts/Memory";
 
 export default function ProductPage(props) {
   const { images, price, name, description, inStock, id } = props.data;
-  const { profile, addToCart } = useData();
+  const { profile, addToCart, addToPayment } = useData();
 
   const [numberOfItems, setNumberOfItems] = useState(1);
-
-  async function handlePayment() {
-    fetch("http://localhost:3000/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        items: [{ id: id, quantity: numberOfItems }],
-      }),
-    })
-      .then((res) => {
-        if (res.ok) return res.json();
-        return res.json().then((json) => Promise.reject(json));
-      })
-      .then(({ url }) => {
-        window.location = url;
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }
 
   return (
     <div className="mx-16 my-16 flex flex-col">
@@ -69,14 +47,11 @@ export default function ProductPage(props) {
             <button className="button button__small button__positive mr-5" onClick={() => addToCart(id, numberOfItems)}>
               Přidat do košíku
             </button>
-            <button
-              className="button button__small button__black"
-              onClick={async () => {
-                handlePayment();
-              }}
-            >
+
+            <button className="button button__small button__black" onClick={() => addToPayment([{ id: id, quantity: numberOfItems }])}>
               Koupit
-            </button>{" "}
+            </button>
+
             {/* after the payment method will finish - make */}
           </div>
 

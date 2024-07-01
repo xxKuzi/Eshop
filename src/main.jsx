@@ -8,9 +8,9 @@ import { BrowserRouter } from "react-router-dom";
 import { Memory } from "./parts/Memory.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <Memory>
-    <BrowserRouter>
+  <BrowserRouter>
+    <Memory>
       <App />
-    </BrowserRouter>
-  </Memory>,
+    </Memory>
+  </BrowserRouter>,
 );

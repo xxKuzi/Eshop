@@ -14,18 +14,10 @@ export default function Cart_Item(props) {
           <p className=" text-xl font-bold">{name}</p>
         </div>
         <div className="flex items-center">
-          <div className="mr-8 flex items-center rounded-xl border-2 p-3">
-            <p className="mr-3">
-              {" "}
-              {quantity} {quantity === 0 ? "kusů" : quantity === 1 ? "kus" : quantity < 5 ? "kusy" : "kusů"}
-            </p>
-            <button className="mr-2" onClick={() => (logged ? addToCart(id, 1) : (addToLocalCart(id, 1), refreshCatalog()))}>
-              +
-            </button>
-            <button className="" onClick={() => (logged ? addToCart(id, -1) : (addToLocalCart(id, -1), refreshCatalog()))}>
-              -
-            </button>
-          </div>
+          <p className="mr-3">
+            {quantity} {quantity === 0 ? "kusů" : quantity === 1 ? "kus" : quantity < 5 ? "kusy" : "kusů"}
+          </p>
+
           <p className=" mr-8 text-nowrap text-lg">{price} Kč</p>
           <p className="w-16 text-nowrap text-xl font-bold">{price * quantity} Kč</p>
         </div>

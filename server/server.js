@@ -16,7 +16,7 @@ app.use(
 );
 
 const initializeStoreItems = async () => {
-  const { fetchData } = await import("../src/components/cart/PaymentCatalogData.js"); // Dynamic import
+  const { fetchData } = await import("../src/components/payment/PaymentCatalogData.js"); // Dynamic import
   const catalog = await fetchData(); // Fetch catalog data
 
   return catalog.map((item) => {
@@ -44,9 +44,10 @@ app.post("/create-checkout-session", async (req, res) => {
           quantity: item.quantity,
         };
       }),
-      success_url: `${process.env.CLIENT_URL}/success.html`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel.html`,
+      success_url: `${process.env.CLIENT_URL}/payment-success`,
+      cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
     });
+
     res.json({ url: session.url });
   } catch (e) {
     res.status(500).json({ error: e.message });

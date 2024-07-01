@@ -177,6 +177,7 @@ export default function SignUp(props) {
         email: verifiedEmail,
         newspaper: formData.newspaper,
         cart: [],
+        inPayment: [],
       });
       console.log("CREATING NEW PROFILE");
     } else {
