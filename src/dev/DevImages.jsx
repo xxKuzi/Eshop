@@ -33,11 +33,11 @@ export default function DevImages(props) {
   }
 
   return (
-    <div className="mt-5 flex justify-center">
+    <div className="mt-8 flex justify-center">
       {catalog[0].description !== "testingXYZ" && (
         <div className="flex flex-col items-center justify-center rounded-xl border-4 border-gray-200">
-          <p className="headline mt-4">Images Editor</p>
-          <div className="flex items-center justify-center  p-5">
+          <p className="headline mt-4 font-bold">Images Editor</p>
+          <div className="mt-2 flex items-center justify-center p-5">
             <DragDropContext onDragEnd={handleOnDragEnd}>
               <Droppable droppableId="images" direction="vertical">
                 {(provided) => (

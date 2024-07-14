@@ -8,7 +8,7 @@ import { CgProfile } from "react-icons/cg";
 import { useData } from "../parts/Memory.jsx";
 
 function Navbar() {
-  const { profile, catalog } = useData();
+  const { profile, catalog, updateProfile } = useData();
   const { editor, nickname, uid, cart } = profile;
   const [cartCount, setCartCount] = useState(0);
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
@@ -35,7 +35,7 @@ function Navbar() {
 
   return (
     <div className="flex justify-between bg-gray-100 shadow-md">
-      <div className="ml-5 flex w-64 items-center">
+      <div className="ml-5 flex w-[350px] items-center">
         <a href="/">
           <img className="h-20" src="logo2.png" alt="Logo" />
         </a>
@@ -49,8 +49,19 @@ function Navbar() {
         <NavbarIcon icon={<IoPeopleSharp size="30" />} href="/about-us" text="O nás" />
         <NavbarIcon icon={<MdContactMail size="30" />} href="/contact" text="Kontakt" width="long" />
       </div>
-      <div className="mr-5 flex w-64 items-center justify-end">
-        {editor && <p className="mr-5 flex flex-col font-bold">Editor Mode</p>}
+      <div className="mr-5 flex w-[350px] items-center justify-end">
+        {editor && (
+          <div className="flex">
+            <button className="my-2 mr-4 rounded-lg border border-red-600 px-4  font-semibold text-red-600" onClick={() => updateProfile("editor", false)}>
+              Disable
+            </button>
+            <button className="my-2 mr-4 rounded-lg bg-black px-4  font-semibold text-white" onClick={() => (window.location.href = "dev")}>
+              Dev
+            </button>
+
+            <p className="mr-5 flex flex-col font-bold">Editor Mode</p>
+          </div>
+        )}
         <a className="group relative mr-5 flex flex-col items-center " href="/cart">
           <BsCart3 className="z scale-75 duration-150 group-hover:translate-y-2 group-hover:scale-100" size="40" />
           <div className="absolute left-7 top-0 flex items-center justify-center duration-150 group-hover:translate-x-[-16px] group-hover:translate-y-[7px]">

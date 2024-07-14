@@ -136,119 +136,124 @@ export default function DevProducts(props) {
 
   return (
     <div className="mt-5 flex justify-center">
-      <div className="w-128 mt-5 flex flex-col  items-center rounded-xl border-4 p-5">
-        <p className="font-bold">Editor mode</p>
+      <div className="w-128 mt-5 flex flex-col  items-center rounded-xl border-4 p-6">
+        <p className="headline__big font-bold">Products</p>
+        <div className="mt-6 flex flex-col items-center rounded-lg border-2 p-6">
+          <p className="headline__small font-semibold">Add Product</p>
 
-        <p>name</p>
-        <Input type="text" value={formData.name} name="name" onChange={handleDataChange} />
-        <p>price</p>
-        <Input value={formData.price} name="price" onChange={handleDataChange} />
-        <p>in stock</p>
-        <Input value={formData.inStock} name="inStock" onChange={handleDataChange} />
-        <p>description</p>
-        <Input value={formData.description} name="description" onChange={handleDataChange} />
+          <p className="mt-6">name</p>
+          <Input type="text" value={formData.name} name="name" onChange={handleDataChange} />
+          <p>price</p>
+          <Input value={formData.price} name="price" onChange={handleDataChange} />
+          <p>in stock</p>
+          <Input value={formData.inStock} name="inStock" onChange={handleDataChange} />
+          <p>description</p>
+          <Input value={formData.description} name="description" onChange={handleDataChange} />
 
-        <input
-          type="file"
-          className="mt-3"
-          onChange={(e) => {
-            let file = e.target.files[0];
-            fileRef.current = file;
-            setUploadState("reset");
-            setUploadText("");
-          }}
-        />
-        <button className="mt-5 rounded-xl bg-sky-700 px-4 py-2 text-white hover:bg-sky-800 sm:px-8 sm:py-3" onClick={addToCatalogLocal}>
-          {uploadButton}
-        </button>
-
-        <div className="mt-2 flex">
-          <p className="mr-1">{uploadText}</p>
-        </div>
-        <div className="mt-8 flex items-center">
-          <p className="mr-4 text-2xl font-bold">Dev Catalog</p>
-          <Select
-            catalog={catalog}
-            update={(value) => {
-              props.setSelected(value);
-
-              idRef.current = Number(value.substring(0, 1));
-
-              findNewItem();
+          <input
+            type="file"
+            className="mt-3"
+            onChange={(e) => {
+              let file = e.target.files[0];
+              fileRef.current = file;
+              setUploadState("reset");
+              setUploadText("");
             }}
-            value={props.selected}
-          ></Select>
-        </div>
-        <div className="flex">
-          <div className="flex flex-wrap">
-            {catalog[0].description !== "testingXYZ" && (
-              <div className="mt-8 flex flex-col items-center">
-                <div className="flex">
-                  <div className="min-w-15 mx-3 mt-5 flex w-64 flex-initial flex-col items-center rounded-xl bg-white text-center ">
-                    <p className="text-xl font-bold">For Updating</p>
-                    <p>------------------------------------</p>
-                    <input type="text" name="name" className="text-center text-xl font-bold" value={editingForm.name} onChange={handleEditingForm}></input>
-                    <div className="mt-2 flex justify-center">
-                      <a className="mr-1 flex h-20 w-20" href="/schick-glaser">
-                        <img className="h-20 w-max" src={editingForm.images[0] && editingForm.images[0].url} />
-                      </a>
-                      <div className="flex flex-col justify-center">
-                        <button
-                          title="delete"
-                          onClick={() => {
-                            idRef.current === "testingXYZ" && nullId();
-                            deleteFromCatalog(idRef.current);
-                            idRef.current = "testingXYZ";
-                          }}
-                        >
-                          <MdDelete size="25" />
-                        </button>
-                        <button
-                          className="mt-1"
-                          title="update"
-                          onClick={() => {
-                            idRef.current === "testingXYZ" && nullId();
-                            updateCatalog(Number(idRef.current), editingForm);
-                          }}
-                        >
-                          <MdFileUpload size="25" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex">
-                      <p className="w-[80px] text-left">price:</p>
-                      <input type="text" name="price" className="text-center" title="price" value={editingForm.price} onChange={handleEditingForm}></input>
-                    </div>
-                    <div className="mt-3 flex">
-                      <p className="w-[80px] text-left">inStock:</p>
-                      <input type="text" name="inStock" className="text-center" title="inStock" value={editingForm.inStock} onChange={handleEditingForm}></input>
-                    </div>
-                    <div className="flex">
-                      <p>description:</p>
-                      <input type="text" name="description" className="text-center" title="description" value={editingForm.description} onChange={handleEditingForm}></input>
-                    </div>
-                  </div>
+          />
+          <button className="mt-5 rounded-xl bg-sky-700 px-4 py-2 text-white hover:bg-sky-800 sm:px-8 sm:py-3" onClick={addToCatalogLocal}>
+            {uploadButton}
+          </button>
 
-                  <div className="min-w-15 mx-3 mt-5 flex w-64 flex-initial flex-col items-center rounded-xl bg-white ">
-                    <p className="text-xl font-bold">Actual look</p>
-                    <p>------------------------------------</p>
-                    <p className="text-xl font-bold">{designForm.name}</p>
-
-                    <a className="mt-2 flex justify-center" href="/schick-glaser">
-                      <img className="h-20 w-max" src={designForm.images[0] && designForm.images[0].url} />
-                    </a>
-
-                    <p className="mt-3">{designForm.price} Kč</p>
-                    <p>{designForm.inStock} ks</p>
-                    <p>{designForm.description}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className="mt-2 flex">
+            <p className="mr-1">{uploadText}</p>
           </div>
         </div>
-        <p>Images</p>
-        <p>Products</p>
+        <div className="mt-6 flex flex-col items-center rounded-lg border-2 p-6">
+          <div className="mt-2 flex items-center">
+            <p className="headline__small mr-4 font-semibold">Update Product</p>
+            <Select
+              catalog={catalog}
+              update={(value) => {
+                props.setSelected(value);
+
+                idRef.current = Number(value.substring(0, 1));
+
+                findNewItem();
+              }}
+              value={props.selected}
+            ></Select>
+          </div>
+          <div className="flex">
+            <div className="flex flex-wrap">
+              {catalog[0].description !== "testingXYZ" && (
+                <div className="mt-8 flex flex-col items-center">
+                  <div className="flex">
+                    <div className="min-w-15 mx-3 mt-5 flex w-64 flex-initial flex-col items-center rounded-xl bg-white text-center ">
+                      <p className="headline__extraSmall font-bold">For Updating</p>
+                      <p>------------------------------------</p>
+                      <input type="text" name="name" className="text-center text-lg font-semibold" value={editingForm.name} onChange={handleEditingForm}></input>
+                      <div className="mt-2 flex justify-center">
+                        <a className="mr-1 flex h-20 w-20" href="/schick-glaser">
+                          <img className="h-20 w-max" src={editingForm.images[0] && editingForm.images[0].url} />
+                        </a>
+                        <div className="flex flex-col justify-center">
+                          <button
+                            title="delete"
+                            onClick={() => {
+                              idRef.current === "testingXYZ" && nullId();
+                              deleteFromCatalog(idRef.current);
+                              idRef.current = "testingXYZ";
+                            }}
+                          >
+                            <MdDelete size="25" />
+                          </button>
+                          <button
+                            className="mt-1"
+                            title="update"
+                            onClick={() => {
+                              idRef.current === "testingXYZ" && nullId();
+                              updateCatalog(Number(idRef.current), editingForm);
+                            }}
+                          >
+                            <MdFileUpload size="25" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="mt-3 flex">
+                        <p className="w-[80px] text-left">price:</p>
+                        <input type="text" name="price" className="text-center" title="price" value={editingForm.price} onChange={handleEditingForm}></input>
+                      </div>
+                      <div className="mt-3 flex">
+                        <p className="w-[80px] text-left">inStock:</p>
+                        <input type="text" name="inStock" className="text-center" title="inStock" value={editingForm.inStock} onChange={handleEditingForm}></input>
+                      </div>
+                      <div className="flex">
+                        <p>description:</p>
+                        <input type="text" name="description" className="text-center" title="description" value={editingForm.description} onChange={handleEditingForm}></input>
+                      </div>
+                    </div>
+
+                    <div className="min-w-15 mx-3 mt-5 flex w-64 flex-initial flex-col items-center rounded-xl bg-white ">
+                      <p className="headline__extraSmall font-bold">Actual look</p>
+                      <p>------------------------------------</p>
+                      <p className="text-lg font-semibold">{designForm.name}</p>
+
+                      <a className="mt-2 flex justify-center" href="/schick-glaser">
+                        <img className="h-20 w-max" src={designForm.images[0] && designForm.images[0].url} />
+                      </a>
+
+                      <p className="mt-3">{designForm.price} Kč</p>
+                      <p>{designForm.inStock} ks</p>
+                      <p>{designForm.description}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <p>Images</p>
+          <p>Products</p>
+        </div>
       </div>
     </div>
   );

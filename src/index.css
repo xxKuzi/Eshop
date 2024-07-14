@@ -47,6 +47,10 @@
   }
 
   .headline__small {
+    @apply text-2xl;
+  }
+
+  .headline__extraSmall {
     @apply text-xl;
   }
 

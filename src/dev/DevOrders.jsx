@@ -16,7 +16,7 @@ export default function DevOrders() {
       ],
     },
   ]);
-  const [data, setData] = useState([{ productId: "1" }]);
+  const [data, setData] = useState([{ productId: "1", images: [{}] }]);
 
   useEffect(() => {
     loadOrders(false);
@@ -43,10 +43,10 @@ export default function DevOrders() {
   }, []);
 
   return (
-    <div className="mt-6 flex justify-center">
-      <div className="flex flex-col items-center gap-2 rounded-xl border-4 p-4">
-        <p className="headline">Orders</p>
-        <div className="mt-2 flex flex-col items-center">
+    <div className="mt-8 flex justify-center">
+      <div className="flex flex-col items-center gap-2 rounded-xl border-4 p-8">
+        <p className="headline font-bold">Orders</p>
+        <div className="mt-4 flex flex-col items-center">
           {orders.map((order, i) => (
             <div key={i} className="flex items-center justify-center gap-2 rounded-lg border-2 border-brand-blue p-2">
               <div className="flex flex-col items-center justify-center">
