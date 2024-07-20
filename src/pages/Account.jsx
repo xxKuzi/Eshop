@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useData } from "../parts/Memory";
 import Login from "../parts/LogIn";
 import Signup from "../parts/SignUp";
-import { MdLocalGasStation } from "react-icons/md";
+
+import Orders from "../components/account/Account_Orders";
 
 export default function Account() {
   const { updateProfile, profile } = useData();
@@ -10,7 +11,7 @@ export default function Account() {
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
   const [loginSwitch, setLoginSwitch] = useState(true);
-  const [newNickname, setNewNickname] = useState();
+  const [newNickname, setNewNickname] = useState("");
 
   React.useEffect(() => {
     profile.uid !== "x" && setNewNickname(profile.nickname);
@@ -21,8 +22,8 @@ export default function Account() {
       {!logged && loginSwitch && <Login changeLoginSwitch={() => setLoginSwitch(loginSwitch ? false : true)} />}
       {!logged && !loginSwitch && <Signup changeLoginSwitch={() => setLoginSwitch(loginSwitch ? false : true)} />}
       {logged && (
-        <div className="flex flex-col items-center rounded-lg border-2 px-16 py-8">
-          <p className="headline mt-4">Účet</p>
+        <div className="flex flex-col items-center rounded-lg border-4 px-16 py-8">
+          <p className="headline mt-4 font-bold">Účet</p>
           <p className="mt-10">{`přezdívka: ${profile.uid !== "x" ? profile.nickname : ""}`}</p>
           <p className="mt-2">{`email: ${profile.uid !== "x" ? profile.email : ""}`}</p>
           <div className="mt-2 flex items-center">
@@ -38,7 +39,8 @@ export default function Account() {
         </div>
       )}
       {logged && (
-        <div>
+        <div className="flex flex-col items-center">
+          <Orders />
           <button
             className="button__normal button__negative mt-10"
             onClick={() => {

@@ -372,6 +372,7 @@ export const Memory = ({ children }) => {
 
     const orderRef = doc(db, "orders", profileArr.openOrder);
     let orderArr = (await getDoc(orderRef)).data();
+    console.log("orderRed ", orderRef);
     await setDoc(orderRef, { ...orderArr, state: newState ? "success" : "canceled" });
 
     loadProfile();
