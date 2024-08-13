@@ -9,7 +9,7 @@ import { useData } from "../parts/Memory.jsx";
 
 function Navbar() {
   const { profile, catalog, updateProfile } = useData();
-  const { editor, nickname, uid, cart } = profile;
+  const { editor, forename, uid, cart } = profile;
   const [cartCount, setCartCount] = useState(0);
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
@@ -73,7 +73,7 @@ function Navbar() {
         </a>
         <a className="group flex w-16 flex-col items-center" href="/account">
           <CgProfile className="scale-75 duration-150 group-hover:translate-y-2 group-hover:scale-100" size="40" />
-          <p className="text-center font-bold duration-150 group-hover:translate-y-4 group-hover:text-transparent">{uid === "x" ? "účet" : nickname}</p>
+          <p className="text-center font-bold duration-150 group-hover:translate-y-4 group-hover:text-transparent">{logged === false ? "účet" : forename}</p>
         </a>
       </div>
     </div>

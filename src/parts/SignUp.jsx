@@ -6,11 +6,13 @@ import { collection, getDocs, addDoc } from "firebase/firestore";
 
 export default function SignUp(props) {
   //#region --- --- --- --- --- --- --- --- --- --- INITIALIZATION --- --- --- --- --- --- --- --- --- ---
+
   const [formData, setFormData] = useState({
+    forename: "",
+    surname: "",
     email: "",
-    nickname: "",
+    phone: "",
     password: "",
-    confirmPassword: "",
     newspaper: false,
   });
 
@@ -18,50 +20,42 @@ export default function SignUp(props) {
     { id: 777, name: "success", state: false, message: "Success" },
     {
       id: 1,
-      name: "duplicate",
+      name: "nothing",
       state: false,
-      message: "This email address already exists",
+      message: "",
     },
     {
       id: 2,
       name: "badFormat",
       state: false,
-      message: "Your email is not in right format",
+      message: "Zadejte prosím platný email",
     },
     {
       id: 3,
-      name: "notSamePassword",
+      name: "notFilled",
       state: false,
-      message: "Your passwords are not the same",
+      message: "Prosím vyplňte všechny údaje",
     },
     {
       id: 4,
       name: "tooShort",
       state: false,
-      message: "Your password is too short (at least 6 characters)",
+      message: "Vaše heslo je příliš krátké (alespoň 6 znaků)",
     },
     {
       id: 5,
       name: "already",
       state: false,
-      message: "This email is already registered",
+      message: "Účet s tímto emailem již existuje",
     },
     {
       id: 6,
       name: "upperCaseEmail",
       state: false,
-      message: "Your email has to be lower case",
-    },
-    {
-      id: 7,
-      name: "incorrectData",
-      state: false,
-      message: "You have entered incorrect data",
+      message: "Emailová adresa musí být zapsána pouze malými písmeny",
     },
   ]);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState();
 
   //#endregion
 
@@ -77,7 +71,17 @@ export default function SignUp(props) {
 
   React.useEffect(() => {
     const specialCharacters = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "{", "}", "[", "]", "|", "\\", ";", ":", "'", '"', "<", ">", ",", ".", "/", "?", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-    formData.email.split("").some((char) => !specialCharacters.includes(char) && char.toUpperCase() === char) ? ChangeError(6, true) : ChangeError(6, false);
+    formData.email.split("").some((char) => !specialCharacters.includes(char) && char.toUpperCase() === char) ? changeError(6, true) : changeError(6, false);
+
+    let empty = false;
+    Object.values(formData).forEach((value) => {
+      if (value === "") {
+        empty = true;
+      }
+    });
+    if (!empty) {
+      changeError(3, false);
+    }
   }, [formData]);
 
   //#endregion
@@ -87,30 +91,31 @@ export default function SignUp(props) {
   //After formData UPDATE
   React.useEffect(() => {
     //ON
-    !formData.email.includes("@") && formData.email !== "" && formData.password !== "" ? ChangeError(2, true) : ChangeError(2, false);
+    !formData.email.includes("@") && formData.email !== "" && formData.phone !== "" ? changeError(2, true) : changeError(2, false);
 
     //OFF
-    formData.password.length >= 6 ? ChangeError(4, false) : null;
-    ChangeError(3, false);
-    ChangeError(5, false);
-    ChangeError(7, false);
-    formData.email !== "" ? ChangeError(777, false) : null;
+    formData.password.length >= 6 ? changeError(4, false) : null;
+    changeError(5, false);
+    formData.email !== "" ? changeError(777, false) : null;
   }, [formData]);
 
   /* Changing error */
-  function ChangeError(objectId, value) {
-    objectId === 777 && value === true ? setErrorStorage((prev) => prev.map((item) => (item.id === 777 ? { ...item, state: true } : { ...item, state: false }))) : setErrorStorage((prev) => prev.map((item) => (item.id === objectId ? { ...item, state: value } : item)));
+  function changeError(objectId, value) {
+    setErrorStorage((prev) => prev.map((item) => (item.id === objectId ? { ...item, state: value } : item)));
   }
 
   /* Changing error text */
   React.useEffect(() => {
-    let text = "";
-    let multiple = false;
-    errorStorage.map((item) => {
-      item.state === true ? (multiple === true ? (text += " | " + String(item.message)) : ((text += String(item.message)), (multiple = true))) : null;
-    });
-    errorStorage[0].state === true ? setSuccess(true) : setSuccess(false);
-    setErrorMessage(text);
+    let errors = (
+      <div className="flex flex-col items-center">
+        {errorStorage
+          .filter((item) => item.state === true)
+          .map((item) => (
+            <p key={item.id}>{item.message}</p>
+          ))}
+      </div>
+    );
+    setErrorMessage(errors);
   }, [errorStorage]);
 
   //#endregion
@@ -118,7 +123,7 @@ export default function SignUp(props) {
   //#region  --- --- --- --- --- --- --- --- --- --- GOOGLE SIGNUP --- --- --- --- --- --- --- --- --- ---
 
   function googleClick(e) {
-    signInWithPopup(auth, provider).then((data) => getData(data));
+    signInWithPopup(auth, provider).then((data) => getData(data, 1));
   }
 
   //#endregion
@@ -127,19 +132,29 @@ export default function SignUp(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const { email, password, confirmPassword } = formData;
+    const { email, password } = formData;
 
-    password !== confirmPassword ? ChangeError(3, true) : ChangeError(3, false);
-    password.length < 6 ? ChangeError(4, true) : ChangeError(4, false);
+    password.length < 6 ? changeError(4, true) : changeError(4, false);
 
-    if (errorMessage !== "" || password.length < 6 || formData.password !== formData.confirmPassword) {
+    let empty = false;
+    Object.values(formData).forEach((item) => {
+      if (item === "") {
+        empty = true;
+      }
+    });
+    if (empty) {
+      changeError(3, true);
+    } else {
+      changeError(3, false);
+    }
+
+    if (errorMessage !== "" || password.length < 6 || empty) {
       console.log("RETURNING");
       return;
     }
-
     createUserWithEmailAndPassword(auth, email, password)
-      .then((data) => (typeof data !== null ? getData(data) : ChangeError(6, true)))
-      .catch((error) => (console.log(error), error.message.includes("already") === true ? ChangeError(5, true) : setErrorMessage((prev) => prev + error.message.split("(")[1].split(")")[0])));
+      .then((data) => (typeof data !== null ? getData(data, 0) : changeError(6, true)))
+      .catch((error) => (console.log(error), error.message.includes("already") === true ? changeError(5, true) : setErrorMessage((prev) => prev + error.message.split("(")[1].split(")")[0])));
   }
 
   //#endregion
@@ -148,42 +163,73 @@ export default function SignUp(props) {
 
   function successful() {
     setFormData({
+      forename: "",
+      surname: "",
       email: "",
-      nickname: "",
+      phone: "",
       password: "",
-      confirmPassword: "",
       newspaper: false,
     });
-    ChangeError(777, true);
+    changeError(777, true);
   }
 
-  const getData = async (data) => {
+  const getData = async (data, type) => {
+    //type 0 - normal registration | 1 - Google registration
     const uid = data.user.uid;
     const verifiedEmail = data.user.email;
 
-    localStorage.setItem("uid", data.user.uid);
-
-    // Checking if exist ? if YES => sign in (ONLY GOOGLE)
-    let exist = false;
-    let dataObject = await getDocs(collection(db, "users"));
-    dataObject.forEach((doc) => {
-      doc.data().uid === uid ? (exist = true) : null;
-    });
-
-    if (!exist) {
+    if (type === 0) {
       const docRef = await addDoc(collection(db, "users"), {
         uid: uid,
-        nickname: verifiedEmail.split("@")[0],
         email: verifiedEmail,
+        phone: formData.phone,
         newspaper: formData.newspaper,
+        forename: formData.forename.split("")[0].toUpperCase() + formData.forename.substring(1),
+        surname: formData.surname.charAt(0).toUpperCase() + formData.surname.substring(1),
         cart: [],
         inPayment: [],
+        city: "",
+        street: "",
+        postcode: "",
+        deliveryKind: "",
+        packetaAddress: "",
       });
       console.log("CREATING NEW PROFILE");
-    } else {
-      console.log("EXISTING PROFILE LOADED");
     }
 
+    if (type === 1) {
+      const fullName = data.user.displayName;
+
+      // Checking if exist ? if YES => only log in
+      let exist = false;
+      let dataObject = await getDocs(collection(db, "users"));
+      dataObject.forEach((doc) => {
+        doc.data().uid === uid ? (exist = true) : null;
+      });
+
+      if (!exist) {
+        const docRef = await addDoc(collection(db, "users"), {
+          uid: uid,
+          email: verifiedEmail,
+          phone: "",
+          newspaper: true,
+          forename: fullName.split(" ")[0].charAt(0).toUpperCase() + fullName.split(" ")[0].slice(1).toLowerCase(),
+          surname: fullName.split(" ")[1].charAt(0).toUpperCase() + fullName.split(" ")[1].slice(1).toLowerCase(),
+          cart: [],
+          inPayment: [],
+          city: "",
+          street: "",
+          postcode: "",
+          deliveryKind: "",
+          packetaAddress: "",
+        });
+        console.log("CREATING NEW PROFILE");
+      } else {
+        console.log("EXISTING PROFILE LOADED");
+      }
+    }
+
+    localStorage.setItem("uid", uid);
     successful();
 
     setTimeout(() => {
@@ -198,27 +244,34 @@ export default function SignUp(props) {
   return (
     <div className="signup">
       <div className="container">
-        <h1 className="headline mt-3">Sign up</h1>
-        <input type="text" className="input__normal input mt-5" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} />
-        <input type="text" className="input__normal input" name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
-        <input type="text" className="input__normal input" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} />
+        <h1 className="headline mt-3">Registrace</h1>
+
+        <input type="text" className="input__normal input mt-5" name="forename" placeholder="Jméno" value={formData.forename} onChange={handleChange} />
+        <input type="text" className="input__normal input" name="surname" placeholder="Příjmení" value={formData.surname} onChange={handleChange} />
+        <input type="text" className="input__normal input" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+        <input type="text" className="input__normal input" name="phone" placeholder="Telefon" value={formData.phone} onChange={handleChange} />
+        <input type="text" className="input__normal input" name="password" placeholder="Heslo" value={formData.password} onChange={handleChange} />
         <div className="marketing">
-          <input id="newspaper" className="mr-2" type="checkbox" name="newspaper" onChange={handleChange} checked={formData.newspaper} />
-          <label htmlFor="newspaper">I want to receive newsletter with exclusive bonuses</label>
+          <input id="newspaper" className="mr-2 mt-2" type="checkbox" name="newspaper" onChange={handleChange} checked={formData.newspaper} />
+          <label htmlFor="newspaper" className="font-normal">
+            Chci dostávat informace o akčních nabídkách
+          </label>
         </div>
 
-        <label className={`error bold ${success === false ? "red" : "green"}`}>{errorMessage}</label>
+        <p className={`error bold mt-4 ${errorStorage[0].state ? "text-green-500" : "text-red-600"}`}>{errorMessage}</p>
 
-        <button className="button button__normal button__submit mt-10">Sign up</button>
+        <button className="button button__normal button__submit mt-6" onClick={handleSubmit}>
+          Registrovat
+        </button>
         <button type="button" className="google" onClick={googleClick}>
-          <p className="google--text">Sign up with Google</p>
+          <p className="google--text">Google přihlášení</p>
           <img className="google--logo" src="../../google_logo.png" alt="Google Authentication"></img>
         </button>
 
         <div className="endText flex items-center">
-          <p className="mr-1">Already have an account?</p>
+          <p className="mr-1">Již máš účet?</p>
           <button className="link" onClick={props.changeLoginSwitch}>
-            Log in
+            Přihlásit se
           </button>
         </div>
       </div>

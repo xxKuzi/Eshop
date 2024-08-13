@@ -35,7 +35,6 @@ export default function DevOrders() {
         });
 
         setData(dataArr);
-        console.log(dataArr);
       });
     }
     loadOrders();

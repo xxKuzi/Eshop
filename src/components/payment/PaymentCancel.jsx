@@ -6,7 +6,6 @@ export default function PaymentCancel() {
 
   useEffect(() => {
     console.log("Payment was canceled");
-
     addOrderToProfile(false);
   }, []);
 

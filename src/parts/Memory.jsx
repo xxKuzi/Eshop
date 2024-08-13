@@ -11,23 +11,30 @@ const DataContext = createContext();
 
 // Create a context provider component
 export const Memory = ({ children }) => {
-  let emptyObject = {
+  let emptyProduct = {
     id: 0,
     name: "",
     price: 0,
     images: [{ url: "", id: 0 }],
     description: "testingXYZ",
   };
-  const [catalog, setCatalog] = useState([emptyObject]);
-  const [profile, setProfile] = useState({
-    editor: false,
-    nickname: "Honza",
-    newspaper: false,
-    email: "email",
-    uid: "x",
+  const emptyProfile = {
+    uid: "",
+    email: "",
+    phone: "",
+    newspaper: true,
+    forename: "",
+    surname: "",
     cart: [],
     inPayment: [],
-  });
+    city: "",
+    street: "",
+    postcode: "",
+    deliveryKind: "",
+    packetaAddress: "",
+  };
+  const [catalog, setCatalog] = useState([emptyProduct]);
+  const [profile, setProfile] = useState(emptyProfile);
 
   const key = useRef("");
   const catalogKey = useRef();
@@ -93,7 +100,7 @@ export const Memory = ({ children }) => {
   const loadCatalog = async () => {
     let querySnapshot = await getDocs(collection(db, "catalog"));
     let dataObject = querySnapshot.docs.map((doc) => doc.data());
-    dataObject.length !== 0 ? setCatalog(dataObject) : setCatalog([emptyObject]);
+    dataObject.length !== 0 ? setCatalog(dataObject) : setCatalog([emptyProduct]);
   };
 
   const updateDb = async (type, tempValue) => {
@@ -270,8 +277,14 @@ export const Memory = ({ children }) => {
   async function addToCart(id, increaseValue) {
     if (key.current === "") {
       console.log("You have to sing up");
+      await loadProfile();
+    }
+
+    if (key.current === "") {
+      console.log("You have to sing up2");
       return;
     }
+    console.log("adding to cart");
 
     const dataRef = doc(db, "users", key.current);
     let cartArr = (await getDoc(dataRef)).data().cart;
@@ -354,7 +367,7 @@ export const Memory = ({ children }) => {
   }
 
   async function addOrderToProfile(newState) {
-    await loadProfile();
+    await loadProfile(); //think about this
     await loadCatalog();
 
     if (key.current === "") {
@@ -372,7 +385,6 @@ export const Memory = ({ children }) => {
 
     const orderRef = doc(db, "orders", profileArr.openOrder);
     let orderArr = (await getDoc(orderRef)).data();
-    console.log("orderRed ", orderRef);
     await setDoc(orderRef, { ...orderArr, state: newState ? "success" : "canceled" });
 
     loadProfile();
@@ -401,6 +413,26 @@ export const Memory = ({ children }) => {
     loadCatalog();
   }
 
+  async function updateAndRecordProfile(newData) {
+    let record = {};
+    const dataRef = doc(db, "users", key.current);
+    const profileData = (await getDoc(dataRef)).data();
+
+    Object.keys(newData).forEach((type) => {
+      if (profileData[type] === newData[type]) {
+        return;
+      }
+      record = { ...record, [type]: { old: profileData[type], new: newData[type] }, uid: uid.current };
+    });
+
+    if (typeof record !== "undefined" && typeof record !== "null" && Object.keys(record).length > 0) {
+      await updateDoc(dataRef, { ...newData });
+      await addDoc(collection(db, "changes"), record);
+      await loadProfile();
+      await loadCatalog();
+    }
+  }
+
   const contextValue = {
     catalog,
     addToCatalog,
@@ -417,6 +449,8 @@ export const Memory = ({ children }) => {
     addToPayment,
     addOrderToProfile,
     setOpenOrder,
+    updateAndRecordProfile,
+    emptyProfile,
   };
 
   return <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>;

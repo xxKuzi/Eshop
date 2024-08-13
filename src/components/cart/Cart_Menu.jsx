@@ -34,7 +34,7 @@ export default function Cart_Menu() {
       </p>
       <p className="pt-4 text-gray-500">Bezpečná platba</p>
 
-      <button className="mt-10 rounded-lg  bg-black p-3  text-white " onClick={() => (console.log(logged ? profile.cart : unLoggedCart), addToPayment(logged ? profile.cart : unLoggedCart))}>
+      <button className="mt-10 rounded-lg  bg-black p-3  text-white " onClick={() => addToPayment(logged ? profile.cart : unLoggedCart)}>
         Dokončit nákup
       </button>
     </div>

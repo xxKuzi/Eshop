@@ -2,9 +2,11 @@ import React, { useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import "firebase/storage";
 import "firebase/firestore"; //take out both
+
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import { getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCt7V3W9gKJWN_zBX80Pl54zt8QI7FX5DM",
@@ -25,6 +27,7 @@ const storage = getStorage(app);
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+const functions = getFunctions(app);
 
 function listAll() {
   storage
@@ -43,4 +46,4 @@ function listAll() {
     });
 }
 
-export { db, provider, auth, storage, app, listAll };
+export { db, provider, auth, storage, app, listAll, functions };

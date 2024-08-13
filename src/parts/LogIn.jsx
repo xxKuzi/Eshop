@@ -22,42 +22,40 @@ export default function LogIn(props) {
       id: 2,
       name: "badFormat",
       state: false,
-      message: "Your email is not in right format",
+      message: "Zadejte prosím platný email",
     },
     {
       id: 3,
       name: "notSamePassword",
       state: false,
-      message: "Your passwords are not the same",
+      message: "Vaše hesla se neshodují",
     },
     {
       id: 4,
-      name: "tooShort",
+      name: "free",
       state: false,
-      message: "Your password is too short (at least 6 characters)",
+      message: "",
     },
     {
       id: 5,
-      name: "already",
+      name: "free2",
       state: false,
-      message: "This email is already registered",
+      message: "",
     },
     {
       id: 6,
       name: "upperCaseEmail",
       state: false,
-      message: "Your email has to be lower case",
+      message: "Emailová adresa musí být zapsána pouze malými písmeny",
     },
     {
       id: 7,
       name: "incorrectData",
       state: false,
-      message: "You have entered incorrect data",
+      message: "Zadané údaje nejsou správné",
     },
   ]);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const [success, setSuccess] = useState(false);
 
   //#endregion
 
@@ -86,7 +84,6 @@ export default function LogIn(props) {
     //ON
     !formData.email.includes("@") && formData.email !== "" && formData.password !== "" ? ChangeError(2, true) : ChangeError(2, false);
     //OFF
-    ChangeError(5, false);
     ChangeError(7, false);
     formData.email !== "" ? ChangeError(777, false) : null;
   }, [formData]);
@@ -103,7 +100,6 @@ export default function LogIn(props) {
     errorStorage.map((item) => {
       item.state === true ? (multiple === true ? (text += " | " + String(item.message)) : ((text += String(item.message)), (multiple = true))) : null;
     });
-    errorStorage[0].state === true ? setSuccess(true) : setSuccess(false);
     setErrorMessage(text);
   }, [errorStorage]);
 
@@ -111,7 +107,7 @@ export default function LogIn(props) {
 
   //#region --- --- --- --- --- --- --- --- --- --- GOOGLE LOGIN --- --- --- --- --- --- --- --- --- ---
   function googleClick(e) {
-    signInWithPopup(auth, provider).then((data) => getData(data));
+    signInWithPopup(auth, provider).then((data) => getData(data, 1));
   }
 
   //#endregion
@@ -119,16 +115,14 @@ export default function LogIn(props) {
   //#region --- --- --- --- --- --- --- --- --- --- EMAIL LOGIN --- --- --- --- --- --- --- --- --- ---
   function handleSubmit(event) {
     event.preventDefault();
-    const { email: email, password: password } = formData;
-
+    const { email, password } = formData;
     if (errorMessage !== "") {
       console.log("RETURNING");
       return;
     }
-
     signInWithEmailAndPassword(auth, email, password)
-      .then((data) => (typeof data !== null ? getData(data) : ChangeError(7, true)))
-      .catch((error) => (console.log(error), error !== null ? ChangeError(7, true) : null));
+      .then((data) => (typeof data !== null ? getData(data, 0) : ChangeError(7, true)))
+      .catch((error) => (console.log(error), error !== null ? (ChangeError(7, true), console.log(error)) : null));
   }
 
   //#endregion
@@ -143,39 +137,58 @@ export default function LogIn(props) {
     ChangeError(777, true);
   }
 
-  const getData = async (data) => {
+  async function getData(data, type) {
     const uid = data.user.uid;
-    const verifiedEmail = data.user.email;
-
-    localStorage.setItem("uid", uid);
-
-    // Checking if exist ? if NOT => Create a new account (ONLY GOOGLE)
-    let exist = false;
-    let dataObject = await getDocs(collection(db, "users"));
-    dataObject.forEach((doc) => {
-      doc.data().uid === uid ? (exist = true) : console.log(doc.data().uid + " " + uid);
-    });
-
-    if (!exist) {
-      const docRef = await addDoc(collection(db, "users"), {
-        uid: uid,
-        nickname: verifiedEmail.split("@")[0],
-        email: verifiedEmail,
-        newspaper: false,
-        cart: [],
-        inPayment: [],
-      });
-      console.log("CREATING NEW PROFILE");
-    } else {
+    if (type === 0) {
       console.log("EXISTING PROFILE LOADED");
     }
+    if (type === 1) {
+      const verifiedEmail = data.user.email;
+      const fullName = data.user.displayName;
+
+      // Checking if exist ? if NOT => Create a new account
+      let exist = false;
+      let dataObject = await getDocs(collection(db, "users"));
+      dataObject.forEach((doc) => {
+        doc.data().uid === uid ? (exist = true) : null;
+      });
+
+      if (!exist) {
+        const docRef = await addDoc(collection(db, "users"), {
+          uid: uid,
+          forename: fullName.split(" ")[0].charAt(0).toUpperCase() + fullName.split(" ")[0].slice(1).toLowerCase(),
+          surname: fullName.split(" ")[1].charAt(0).toUpperCase() + fullName.split(" ")[1].slice(1).toLowerCase(),
+          email: verifiedEmail,
+          phone: "",
+          newspaper: false,
+          cart: [],
+          inPayment: [],
+          city: "",
+          street: "",
+          postcode: "",
+          deliveryKind: "",
+          packetaAddress: "",
+        });
+        console.log("CREATING NEW PROFILE");
+      } else {
+        console.log("EXISTING PROFILE LOADED");
+      }
+    }
+
+    localStorage.setItem("uid", uid);
+    localStorage.removeItem("details");
+    let localCart = JSON.parse(localStorage.getItem("cart"));
+    localStorage.removeItem("cart");
+
+    console.log(localCart);
+    localStorage.setItem("toOnlineCart", JSON.stringify(localCart));
 
     successful();
 
     setTimeout(() => {
       window.location.href = "/";
     }, 700);
-  };
+  }
 
   //#endregion
 
@@ -185,24 +198,24 @@ export default function LogIn(props) {
     <div>
       <div className="login">
         <div className="container">
-          <h1 className="headline mt-3">Log in</h1>
-          <input type="text" className="input__normal input mt-5" name="email" placeholder="Email Address" value={formData.email} onChange={handleChange} />
-          <input type="text" className="input__normal input" name="password" placeholder="Password" value={formData.password} onChange={handleChange} />
+          <h1 className="headline mt-3">Přihlášení</h1>
+          <input type="text" className="input__normal input mt-5" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+          <input type="text" className="input__normal input" name="password" placeholder="Heslo" value={formData.password} onChange={handleChange} />
 
-          <p className={`error bold ${errorStorage[0].state ? "green" : "red"}`}>{errorMessage}</p>
+          <p className={`error bold mt-4 ${errorStorage[0].state ? "text-green-500" : "text-red-600"}`}>{errorMessage}</p>
 
-          <button className="button button__normal button__submit mt-10" onClick={handleSubmit}>
-            Sign up
+          <button className="button button__normal button__submit mt-6" onClick={handleSubmit}>
+            Přihlásit
           </button>
 
           <button className="google" onClick={googleClick}>
-            <p className="google--text">Log in with Google</p>
+            <p className="google--text">Google přihlášení</p>
             <img className="google--logo" src="../../google_logo.png" alt="Google Authentication"></img>
           </button>
           <div className="endText flex items-center">
-            <p className="mr-1">Still don't have an account?</p>
+            <p className="mr-1">Ještě stále nemáš účet?</p>
             <button className="link" onClick={props.changeLoginSwitch}>
-              Sign up
+              Registrovat se
             </button>
           </div>
         </div>
