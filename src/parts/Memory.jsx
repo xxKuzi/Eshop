@@ -47,6 +47,18 @@ export const Memory = ({ children }) => {
     loadCatalog();
   }, []);
 
+  useEffect(() => {
+    setTimeout(async () => {
+      let localCart = JSON.parse(localStorage.getItem("toOnlineCart"));
+      localStorage.removeItem("toOnlineCart");
+      if (localCart) {
+        for (let item of localCart) {
+          await addToCart(item.id, item.quantity);
+        }
+      }
+    }, 700);
+  }, [profile]);
+
   const loadProfile = async () => {
     let dataObject = await getDocs(collection(db, "users"));
     dataObject.forEach((doc) => {
@@ -277,13 +289,9 @@ export const Memory = ({ children }) => {
   async function addToCart(id, increaseValue) {
     if (key.current === "") {
       console.log("You have to sing up");
-      await loadProfile();
-    }
-
-    if (key.current === "") {
-      console.log("You have to sing up2");
       return;
     }
+
     console.log("adding to cart");
 
     const dataRef = doc(db, "users", key.current);

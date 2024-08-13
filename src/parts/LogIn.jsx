@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, provider, db } from "./Base";
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { useData } from "./Memory";
 
 export default function LogIn(props) {
   //#region --- --- --- --- --- --- --- --- --- --- INITIALIZATION --- --- --- --- --- --- --- --- --- ---
+  const { addToCart } = useData();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -176,12 +178,11 @@ export default function LogIn(props) {
     }
 
     localStorage.setItem("uid", uid);
-    localStorage.removeItem("details");
     let localCart = JSON.parse(localStorage.getItem("cart"));
-    localStorage.removeItem("cart");
-
-    console.log(localCart);
     localStorage.setItem("toOnlineCart", JSON.stringify(localCart));
+
+    localStorage.removeItem("details");
+    localStorage.removeItem("cart");
 
     successful();
 

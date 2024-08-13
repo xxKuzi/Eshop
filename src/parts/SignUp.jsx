@@ -148,7 +148,12 @@ export default function SignUp(props) {
       changeError(3, false);
     }
 
-    if (errorMessage !== "" || password.length < 6 || empty) {
+    let errorTrue = false;
+    errorStorage.forEach((item) => {
+      item.state === true ? (errorTrue = true) : null;
+    });
+
+    if (errorTrue || password.length < 6 || empty) {
       console.log("RETURNING");
       return;
     }
@@ -230,6 +235,11 @@ export default function SignUp(props) {
     }
 
     localStorage.setItem("uid", uid);
+    let localCart = JSON.parse(localStorage.getItem("cart"));
+    localStorage.setItem("toOnlineCart", JSON.stringify(localCart));
+
+    localStorage.removeItem("details");
+    localStorage.removeItem("cart");
     successful();
 
     setTimeout(() => {

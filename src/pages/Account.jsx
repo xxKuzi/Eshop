@@ -13,8 +13,6 @@ export default function Account() {
 
   React.useEffect(() => {
     profile.uid !== "x" && setFormData((prev) => ({ ...prev, forename: profile.forename, surname: profile.surname, city: profile.city, street: profile.street, postcode: profile.postcode }));
-    console.log("street bro", profile.street);
-    console.log(profile);
   }, [profile]);
 
   function changeForm(type, value) {
