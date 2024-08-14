@@ -33,38 +33,49 @@ export default function Account_Orders() {
 
       setOrders(filteredOrders);
       setData(dataArr);
+      console.log(dataArr);
     }
 
     loadOrders();
   }, [profile.uid, catalog]);
 
   return (
-    <div className="mt-8 flex justify-center">
-      <div className="flex min-h-[320px] min-w-[820px] flex-col items-center gap-2 rounded-xl border-4 p-8">
-        <p className="headline font-bold">Nákupy</p>
-        <div className="mt-4 flex flex-col items-center gap-2 rounded-lg p-2">
-          {data.map((order, index) => (
-            <div key={order.id} className="flex w-[800px] items-center justify-between rounded-xl border-4 p-4">
-              <div className="flex flex-col">
-                {order.products.map((product, pIndex) => (
-                  <div key={product.id + pIndex} className="flex items-center justify-between gap-8">
-                    <img className="h-16" src={product.images[0]?.url || ""} alt={`Image of ${product.id}`} />
-                    <div className="flex w-[300px]">
-                      <p className="w-[200px]">{product.name}</p>
-                      <p className="w-[50px]">{product.quantity}ks</p>
-                      <p className="w-[90px] text-end">{product.price * product.quantity}kč</p>
-                    </div>
+    <div>
+      {data.length > 0 && (
+        <div className="mt-8 flex justify-center">
+          <div className="flex min-h-[320px] min-w-[820px] flex-col items-center gap-2 rounded-xl border-4 p-8">
+            <p className="headline font-bold">Nákupy</p>
+            <div className="mt-4 flex flex-col items-center gap-2 rounded-lg p-2">
+              {data.map((order, index) => (
+                <div key={order.id} className="flex w-[800px] items-center justify-between rounded-xl border-4 p-4">
+                  <div className="flex flex-col">
+                    {order.products.map((product, pIndex) => (
+                      <div key={product.id + pIndex} className="flex items-center justify-between gap-8">
+                        <img className="h-16" src={product.images[0]?.url || ""} alt={`Image of ${product.id}`} />
+                        <div className="flex w-[300px]">
+                          <p className="w-[200px]">{product.name}</p>
+                          <p className="w-[50px]">{product.quantity}ks</p>
+                          <p className="w-[90px] text-end">{product.price * product.quantity}kč</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="flex w-[200px] justify-between">
-                <p className="mr-8 w-[60px] text-end font-semibold">{order.products.reduce((sum, product) => sum + product.price * product.quantity, 0) + "Kč"}</p>
-                <p className={"w-[100px] text-center font-bold " + (order.state === "success" ? "text-green-500" : "text-red-600")}>{order.state === "success" ? "dokončeno" : "nedokončeno"}</p>
-              </div>
+                  <div className="flex w-[200px] justify-between">
+                    <p className="mr-8 w-[60px] text-end font-semibold">{order.products.reduce((sum, product) => sum + product.price * product.quantity, 0) + "Kč"}</p>
+                    <p className={"w-[100px] text-center font-bold " + (order.state === "success" ? "text-green-500" : "text-red-600")}>{order.state === "success" ? "dokončeno" : "nedokončeno"}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
+      {data.length < 1 && (
+        <div className="mt-8 flex min-h-[320px] min-w-[820px] flex-col items-center justify-center gap-2 rounded-xl border-4 p-8">
+          <p className="headline font-bold">Nákupy</p>
+          <p className="py-[90px]">zatím nemáte žádné nákupy</p>
+        </div>
+      )}
     </div>
   );
 }

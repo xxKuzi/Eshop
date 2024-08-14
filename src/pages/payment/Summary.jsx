@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useData } from "../../parts/Memory.jsx";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import Items from "../../components/payment/Summary_Items.jsx";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, setDoc, doc } from "firebase/firestore";
 import { db } from "../../parts/Base";
 import { httpsCallable } from "firebase/functions";
 import { functions } from "../../parts/Base.js";
@@ -43,20 +43,19 @@ export default function Payment_Form() {
     const stripe = await stripePromise;
     const response = await paymentFunction(paymentItems);
     let sessionId = response.data.id;
+    await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: profile.inPayment, uid: profile.uid });
     await stripe.redirectToCheckout({ sessionId: sessionId });
   }
 
   async function createOrder() {
-    const docRef = await addDoc(collection(db, "orders"), { ...form, products: profile.inPayment, uid: profile.uid });
-
-    setOpenOrder(docRef.id);
+    //setOpenOrder(docRef.id);
     handlePayment();
   }
 
   function renderProfileData() {
     return (
       <div className="flex justify-between gap-8 px-6 py-4">
-        <div className="flex flex min-w-[200px] flex-col">
+        <div className="flex min-w-[200px] flex-col">
           <p className="headline__small">Kontaktní údaje</p>
           <div className="h-1 w-[162px] rounded-md bg-gray-200"></div>
           <div className="mt-3 flex flex-col text-gray-600">
