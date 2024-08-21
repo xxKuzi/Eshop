@@ -10,12 +10,13 @@ export default function Details() {
   useEffect(() => {
     if (!logged) {
       let data = JSON.parse(localStorage.getItem("details")) || {};
+      console.log("setting data ", data);
       setForm(data);
     }
   }, []);
 
   useEffect(() => {
-    if (profile) {
+    if (logged) {
       setForm({ forename: profile.forename, surname: profile.surname, phone: profile.phone, email: profile.email, city: profile.city, street: profile.street, postcode: profile.postcode });
     }
   }, [profile]);
@@ -33,7 +34,9 @@ export default function Details() {
   }, [form]);
 
   function handleSubmit() {
-    updateAndRecordProfile(form);
+    if (logged) {
+      updateAndRecordProfile(form);
+    }
     setTimeout(() => {
       window.location.href = "/payment-summary";
     }, 700);

@@ -38,7 +38,7 @@ export default function ProductPage(props) {
               +
             </button>
             <p className="mr-6 text-lg">{numberOfItems}</p>
-            <button className="text-xl" onClick={() => setNumberOfItems((old) => old - 1)}>
+            <button className="text-xl" onClick={() => setNumberOfItems((old) => (old > 1 ? old - 1 : old))}>
               -
             </button>
           </div>

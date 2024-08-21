@@ -158,7 +158,7 @@ export default function SignUp(props) {
       return;
     }
     createUserWithEmailAndPassword(auth, email, password)
-      .then((data) => (typeof data !== null ? getData(data, 0) : changeError(6, true)))
+      .then((data) => (typeof data !== null ? getData(data, 0) : null))
       .catch((error) => (console.log(error), error.message.includes("already") === true ? changeError(5, true) : setErrorMessage((prev) => prev + error.message.split("(")[1].split(")")[0])));
   }
 
@@ -198,6 +198,8 @@ export default function SignUp(props) {
         postcode: "",
         deliveryKind: "",
         packetaAddress: "",
+        changes: [],
+        orders: [],
       });
       console.log("CREATING NEW PROFILE");
     }
@@ -227,6 +229,8 @@ export default function SignUp(props) {
           postcode: "",
           deliveryKind: "",
           packetaAddress: "",
+          changes: [],
+          orders: [],
         });
         console.log("CREATING NEW PROFILE");
       } else {
@@ -240,6 +244,7 @@ export default function SignUp(props) {
 
     localStorage.removeItem("details");
     localStorage.removeItem("cart");
+    localStorage.removeItem("inPayment");
     successful();
 
     setTimeout(() => {

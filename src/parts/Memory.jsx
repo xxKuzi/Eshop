@@ -35,6 +35,7 @@ export const Memory = ({ children }) => {
   };
   const [catalog, setCatalog] = useState([emptyProduct]);
   const [profile, setProfile] = useState(emptyProfile);
+  const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
   const key = useRef("");
   const catalogKey = useRef();
@@ -286,138 +287,103 @@ export const Memory = ({ children }) => {
     updateDb(type, value);
   };
 
-  async function addToCart(id, increaseValue) {
-    if (key.current === "") {
-      console.log("You have to sing up");
-      return;
-    }
+  async function addToCart(id, quantity) {
+    if (logged) {
+      const dataRef = doc(db, "users", key.current);
+      let cartArr = (await getDoc(dataRef)).data().cart;
 
-    console.log("adding to cart");
+      /* cartArr can be only          
+        - empty array - after you delete last product
+  
+      */
 
-    const dataRef = doc(db, "users", key.current);
-    let cartArr = (await getDoc(dataRef)).data().cart;
+      let newProductToCart = true;
 
-    /* cartArr can be          
-      - empty array - after you delete last product
-
-    */
-
-    let newProductToCart = true;
-
-    //Increasing amount of product in cart
-    cartArr = cartArr.map((product) => {
-      if (product.id === id) {
-        newProductToCart = false;
-        return { ...product, quantity: product.quantity + increaseValue };
-      } else {
-        return product;
-      }
-    });
-
-    // new product to cart | it doesn't exist in bin
-    if (newProductToCart) {
-      cartArr.push({ id: id, quantity: increaseValue });
-    }
-
-    //delete products with 0 quantity
-    cartArr = cartArr.filter((product) => product.quantity !== 0);
-
-    await updateDoc(dataRef, {
-      cart: cartArr,
-    });
-
-    loadProfile(); //need to load Profile because product Id and quantity is located on profile
-    loadCatalog();
-  }
-
-  function addToLocalCart(id, quantity) {
-    let prevCart = JSON.parse(localStorage.getItem("cart"));
-    let newCart = [];
-
-    if (prevCart) {
-      let notAdded = true;
-      newCart = prevCart.map((product) => {
+      //Increasing amount of product in cart
+      cartArr = cartArr.map((product) => {
         if (product.id === id) {
-          product.quantity = product.quantity + quantity;
-          notAdded = false;
-          return product;
+          newProductToCart = false;
+          return { ...product, quantity: product.quantity + quantity };
         } else {
           return product;
         }
       });
-      if (notAdded) [(newCart = [...newCart, { id: id, quantity: quantity }])];
+
+      // new product to cart | it doesn't exist in bin
+      if (newProductToCart) {
+        cartArr.push({ id: id, quantity: quantity });
+      }
+
+      //delete products with 0 quantity
+      cartArr = cartArr.filter((product) => product.quantity !== 0);
+
+      await updateDoc(dataRef, {
+        cart: cartArr,
+      });
+
+      loadProfile(); //need to load Profile because product Id and quantity is located on profile
+      loadCatalog();
     } else {
-      newCart = [{ id: id, quantity: quantity }];
+      let newCart = [];
+      let prevCart = JSON.parse(localStorage.getItem("cart"));
+      /*
+      only two options:
+        - null (never was created)
+        - empty (everything was deleted)
+      */
+
+      if (prevCart) {
+        let notAdded = true;
+        newCart = prevCart.map((product) => {
+          if (product.id === id) {
+            product.quantity = product.quantity + quantity;
+            notAdded = false;
+            return product;
+          } else {
+            return product;
+          }
+        });
+        if (notAdded) [(newCart = [...newCart, { id: id, quantity: quantity }])];
+      } else {
+        newCart = [{ id: id, quantity: quantity }];
+      }
+
+      if (newCart.length) {
+        newCart = newCart.filter((product) => {
+          if (product.quantity === 0) {
+            return false;
+          } else {
+            return true;
+          }
+        });
+      }
+
+      localStorage.setItem("cart", JSON.stringify(newCart));
+      loadCatalog(); //only to refresh the page
     }
-
-    if (newCart.length) {
-      newCart = newCart.filter((product) => {
-        if (product.quantity === 0) {
-          return false;
-        } else {
-          return true;
-        }
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(newCart));
-  }
-
-  function refreshCatalog() {
-    //for refresh in cart when changing localStorage value it doesn't update form
-    loadCatalog();
   }
 
   async function addToPayment(items) {
-    await updateProfile("inPayment", items);
+    if (logged) {
+      await updateProfile("inPayment", items);
+    } else {
+      localStorage.setItem("inPayment", JSON.stringify(items));
+    }
 
     navigate("/payment-delivery");
   }
 
-  async function addOrderToProfile(newState) {
-    await loadProfile(); //think about this
-    await loadCatalog();
-
+  async function addOrderToProfile(newOrder) {
     if (key.current === "") {
       console.log("You have to sing up");
       return;
     }
 
-    if (newState) {
-      updateProfile("cart", []);
-    }
-
-    const profileRef = doc(db, "users", key.current);
-    let profileArr = (await getDoc(profileRef)).data();
-    await setDoc(profileRef, { ...profileArr, orders: [...(profileArr.orders || []), profileArr.openOrder], openOrder: "" }); //delete open order
-
-    const orderRef = doc(db, "orders", profileArr.openOrder);
-    let orderArr = (await getDoc(orderRef)).data();
-    await setDoc(orderRef, { ...orderArr, state: newState ? "success" : "canceled" });
+    let userData = (await getDoc(doc(db, "users", key.current))).data();
+    let newOrders = [...userData.orders, newOrder];
+    await setDoc(doc(db, "users", key.current), { orders: newOrders }, { merge: true });
 
     loadProfile();
-    loadCatalog();
-  }
-
-  async function setOpenOrder(orderId) {
-    if (key.current === "") {
-      console.log("You have to sing up");
-      return;
-    }
-
-    const dataRef = doc(db, "users", key.current);
-    const profileArr = (await getDoc(dataRef)).data();
-
-    if (profileArr.openOrder !== "" && profileArr.openOrder !== undefined) {
-      /* const orderRef = doc(db, "orders", profileArr.openOrder);
-      await updateDoc(orderRef, { state: "overwrited"});
-      console.log("Delete unfinished order"); */
-      await addOrderToProfile(false);
-    }
-
-    await setDoc(dataRef, { ...profileArr, openOrder: orderId });
-
-    loadProfile(); //need to load Profile because product Id and quantity is located on profile
     loadCatalog();
   }
 
@@ -434,8 +400,11 @@ export const Memory = ({ children }) => {
     });
 
     if (typeof record !== "undefined" && typeof record !== "null" && Object.keys(record).length > 0) {
-      await updateDoc(dataRef, { ...newData });
-      await addDoc(collection(db, "changes"), record);
+      let changeDoc = await addDoc(collection(db, "changes"), record);
+
+      profileData.changes ? (newData = { ...newData, changes: [...profileData.changes, changeDoc.id] }) : (newData = { ...newData, changes: [changeDoc.id] });
+      await setDoc(dataRef, newData, { merge: true });
+
       await loadProfile();
       await loadCatalog();
     }
@@ -452,11 +421,8 @@ export const Memory = ({ children }) => {
     profile,
     updateProfile,
     addToCart,
-    addToLocalCart,
-    refreshCatalog,
     addToPayment,
     addOrderToProfile,
-    setOpenOrder,
     updateAndRecordProfile,
     emptyProfile,
   };

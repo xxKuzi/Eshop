@@ -12,7 +12,7 @@ export default function Delivery() {
 
   useEffect(() => {
     if (!logged) {
-      let data = JSON.parse(localStorage.getItem("details")) || { deliveryKind: 0 };
+      let data = JSON.parse(localStorage.getItem("details")) || {};
       setForm(data);
     }
   }, []);
@@ -25,9 +25,8 @@ export default function Delivery() {
 
   useEffect(() => {
     if (logged) {
-      setForm(profile);
-      console.log("hello");
-      console.log(profile);
+      const { forename, surname, email, phone, street, city, postcode, packetaAddress, deliveryKind } = profile;
+      setForm({ street, city, postcode, phone, email, packetaAddress, deliveryKind });
     }
   }, [profile]);
 
@@ -41,12 +40,13 @@ export default function Delivery() {
     if (!logged) {
       localStorage.setItem("details", JSON.stringify(form));
     }
-    console.log("update");
-    console.log("form ", form);
   }, [form]);
 
-  function next() {
-    updateAndRecordProfile(form);
+  function next(e) {
+    if (logged) {
+      updateAndRecordProfile(form);
+    }
+
     setTimeout(() => {
       navigate("/payment-details");
     }, 700);
@@ -72,7 +72,7 @@ export default function Delivery() {
 
       {form.deliveryKind === 0 && (
         <div className="mt-8 flex flex-col items-center justify-center rounded-xl border-2 p-6">
-          <p>Momentálně funguje doručení přes zásilkovnu následovně:</p>
+          <p>Momentálně funguje doručení přes zásilkovnu jenom takto:</p>
 
           <div className="flex flex-col items-center justify-center p-4">
             <div className="mt-8 flex gap-4">
@@ -122,7 +122,7 @@ export default function Delivery() {
 
           <div className="mt-4">
             <p className="mr-4">PSČ</p>
-            <input className="input__normal input" type="text" name="psc" value={form.psc} onChange={updateForm}></input>
+            <input className="input__normal input" type="text" name="postcode" value={form.postcode} onChange={updateForm}></input>
           </div>
 
           <button className="button__normal button__submit mt-10" onClick={next}>

@@ -2,10 +2,9 @@ import React from "react";
 import { useData } from "../../parts/Memory.jsx";
 
 export default function Cart_Menu() {
-  const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
   let { profile, catalog, addToPayment } = useData();
-
-  let unLoggedCart = JSON.parse(localStorage.getItem("cart")); // unLoggedCart
+  const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
+  let unLoggedCart = JSON.parse(localStorage.getItem("cart")) || []; // unLoggedCart
 
   return (
     <div className="mt-10 flex w-[500px] flex-col items-center justify-center rounded-lg border-4 border-gray-300 p-8">
@@ -34,7 +33,7 @@ export default function Cart_Menu() {
       </p>
       <p className="pt-4 text-gray-500">Bezpečná platba</p>
 
-      <button className="mt-10 rounded-lg  bg-black p-3  text-white " onClick={() => addToPayment(logged ? profile.cart : unLoggedCart)}>
+      <button className={"mt-10 rounded-lg  p-3 text-white " + (logged ? (profile.cart.length === 0 ? "bg-gray-300" : "bg-black") : unLoggedCart.length === 0 ? "bg-gray-300" : "bg-black")} disabled={logged ? profile.cart.length === 0 : unLoggedCart.length === 0} onClick={() => addToPayment(logged ? profile.cart : unLoggedCart)}>
         Dokončit nákup
       </button>
     </div>

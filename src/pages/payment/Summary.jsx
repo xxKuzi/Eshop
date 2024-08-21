@@ -9,7 +9,7 @@ import { functions } from "../../parts/Base.js";
 import { loadStripe } from "@stripe/stripe-js";
 
 export default function Payment_Form() {
-  let { profile, catalog, setOpenOrder } = useData();
+  let { profile, catalog, addOrderToProfile, updateProfile } = useData();
   const [form, setForm] = useState({});
   const stripePromise = loadStripe("pk_test_51PFgqzBgAsz06aBbyWeh8PhdqfR9tgomzZLywE66u46cn40vNZs1cKESABxZYXzsZ5yrm3lwN1EFLpuq4VdKX9Mc00ugNhOTL4");
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
@@ -17,39 +17,78 @@ export default function Payment_Form() {
   useEffect(() => {
     if (!logged) {
       let details = JSON.parse(localStorage.getItem("details"));
-      setForm(details);
+      if (details) {
+        setForm(details);
+      }
     }
   }, []);
 
   useEffect(() => {
     if (logged) {
-      let details = JSON.parse(localStorage.getItem("details"));
-      setForm(profile);
+      const { forename, surname, email, phone, street, city, postcode, packetaAddress, deliveryKind } = profile;
+      setForm({ forename, surname, email, phone, street, city, postcode, packetaAddress, deliveryKind, paymentState: "pending" });
     }
   }, [profile]);
 
-  async function handlePayment() {
-    let paymentItems = [];
+  function objectsAreEqual(obj1, obj2) {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
 
-    profile.inPayment.forEach((paymentItem) => {
-      catalog.forEach((catalogItem) => {
-        if (catalogItem.id === paymentItem.id) {
-          paymentItems.push({ ...catalogItem, quantity: paymentItem.quantity });
-        }
-      });
-    });
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    return keys1.every((key) => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]);
+  }
 
-    const paymentFunction = httpsCallable(functions, "createStripeCheckout");
-    const stripe = await stripePromise;
-    const response = await paymentFunction(paymentItems);
-    let sessionId = response.data.id;
-    await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: profile.inPayment, uid: profile.uid });
-    await stripe.redirectToCheckout({ sessionId: sessionId });
+  function CheckArrayEquality(arr1, arr2) {
+    if (arr1.length !== arr2.length) {
+      return false;
+    }
+    return arr1.every((element, index) => objectsAreEqual(element, arr2[index]));
   }
 
   async function createOrder() {
-    //setOpenOrder(docRef.id);
-    handlePayment();
+    if (logged) {
+      let paymentItems = [];
+
+      profile.inPayment.forEach((paymentItem) => {
+        catalog.forEach((catalogItem) => {
+          if (catalogItem.id === paymentItem.id) {
+            paymentItems.push({ ...catalogItem, quantity: paymentItem.quantity });
+          }
+        });
+      });
+
+      const paymentFunction = httpsCallable(functions, "createStripeCheckout");
+      const stripe = await stripePromise;
+      const response = await paymentFunction(paymentItems);
+      let sessionId = response.data.id;
+      await addOrderToProfile(sessionId);
+
+      await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: profile.inPayment, uid: profile.uid });
+      CheckArrayEquality(profile.cart, profile.inPayment) ? await updateProfile("cart", []) : null;
+      await stripe.redirectToCheckout({ sessionId: sessionId });
+    } else {
+      let paymentItems = [];
+      let inPayment = JSON.parse(localStorage.getItem("inPayment"));
+      inPayment.forEach((paymentItem) => {
+        catalog.forEach((catalogItem) => {
+          if (catalogItem.id === paymentItem.id) {
+            paymentItems.push({ ...catalogItem, quantity: paymentItem.quantity });
+          }
+        });
+      });
+
+      const paymentFunction = httpsCallable(functions, "createStripeCheckout");
+      const stripe = await stripePromise;
+      const response = await paymentFunction(paymentItems);
+      let sessionId = response.data.id;
+
+      await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: inPayment, uid: "unregistred" });
+      let cart = JSON.parse(localStorage.getItem("cart"));
+      CheckArrayEquality(cart, inPayment) ? localStorage.setItem("cart", JSON.stringify([])) : null;
+      await stripe.redirectToCheckout({ sessionId: sessionId });
+    }
   }
 
   function renderProfileData() {

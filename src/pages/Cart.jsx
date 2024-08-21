@@ -4,6 +4,9 @@ import Menu from "../components/cart/Cart_Menu.jsx";
 import Items from "../components/cart/Cart_Items.jsx";
 
 export default function Cart() {
+  React.useEffect(() => {
+    localStorage.removeItem("details");
+  });
   return (
     <div className="flex flex-col items-center">
       <div className="flex flex-col items-center">

@@ -17,7 +17,6 @@ export default function Account_Orders() {
 
       const ordersSnapshot = await getDocs(collection(db, "orders"));
       const ordersArr = ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
       const filteredOrders = ordersArr.filter((order) => order.uid === profile.uid);
 
       let dataArr = filteredOrders.map((order) => {
@@ -33,11 +32,35 @@ export default function Account_Orders() {
 
       setOrders(filteredOrders);
       setData(dataArr);
-      console.log(dataArr);
     }
 
     loadOrders();
   }, [profile.uid, catalog]);
+
+  function showStatus(state) {
+    let status = "";
+
+    switch (state) {
+      case "paid":
+        status = "Zaplaceno";
+        break;
+
+      case "pending":
+        status = "Probíhá";
+        break;
+
+      case "expired":
+      case "canceled":
+      case "unpaid":
+        status = "Neúspěšná objednávka";
+        break;
+
+      default:
+        status = "Nastala chyba";
+        break;
+    }
+    return status;
+  }
 
   return (
     <div>
@@ -62,7 +85,7 @@ export default function Account_Orders() {
                   </div>
                   <div className="flex w-[200px] justify-between">
                     <p className="mr-8 w-[60px] text-end font-semibold">{order.products.reduce((sum, product) => sum + product.price * product.quantity, 0) + "Kč"}</p>
-                    <p className={"w-[100px] text-center font-bold " + (order.state === "success" ? "text-green-500" : "text-red-600")}>{order.state === "success" ? "dokončeno" : "nedokončeno"}</p>
+                    <p className={"w-[100px] text-center font-bold " + (order.paymentState === "paid" ? "text-green-500" : order.paymentState === "pending" ? "text-yellow-500" : "text-red-600")}>{showStatus(order.paymentState)}</p>
                   </div>
                 </div>
               ))}

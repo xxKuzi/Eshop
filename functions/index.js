@@ -10,6 +10,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
     mode: "payment",
     success_url: `http://localhost:5173/payment-success`,
     cancel_url: `http://localhost:5173/payment-cancel`,
+    expires_at: Math.floor(Date.now() / 1000) + 3600 * 0.5,
     line_items: data.map((item) => ({
       quantity: item.quantity,
       price_data: {
@@ -17,6 +18,7 @@ exports.createStripeCheckout = functions.https.onCall(async (data, context) => {
         unit_amount: item.price * 100,
         product_data: {
           name: item.name,
+          images: [item.images[0].url],
         },
       },
     })),
@@ -44,10 +46,8 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
   await admin.firestore().collection("orders").doc(dataObject.id).set(
     {
-      checkoutSessionId: dataObject.id,
-      paymentStatus: dataObject.payment_status,
-      // shippingInfo: dataObject.shipping,
-      amountTotal: dataObject.amount_total,
+      sessionId: dataObject.id,
+      paymentState: dataObject.payment_status,
     },
     { merge: true },
   );

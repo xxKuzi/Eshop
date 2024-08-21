@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useData } from "../../parts/Memory.jsx";
 
 export default function Cart_Item(props) {
-  let { addToCart, addToLocalCart, refreshCatalog } = useData();
+  let { addToCart } = useData();
   let { id, name, price, images, quantity } = props.data;
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
@@ -19,10 +19,10 @@ export default function Cart_Item(props) {
               {" "}
               {quantity} {quantity === 0 ? "kusů" : quantity === 1 ? "kus" : quantity < 5 ? "kusy" : "kusů"}
             </p>
-            <button className="mr-2" onClick={() => (logged ? addToCart(id, 1) : (addToLocalCart(id, 1), refreshCatalog()))}>
+            <button className="mr-2" onClick={() => addToCart(id, 1)}>
               +
             </button>
-            <button className="" onClick={() => (logged ? addToCart(id, -1) : (addToLocalCart(id, -1), refreshCatalog()))}>
+            <button className="" onClick={() => addToCart(id, -1)}>
               -
             </button>
           </div>

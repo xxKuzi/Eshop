@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useData } from "../parts/Memory";
 import Login from "../parts/LogIn";
 import Signup from "../parts/SignUp";
 import Orders from "../components/account/Account_Orders";
+import { useLocation } from "react-router-dom";
 
 export default function Account() {
   const { updateProfile, profile, updateAndRecordProfile } = useData();
@@ -12,7 +13,7 @@ export default function Account() {
   const [formData, setFormData] = useState({});
 
   React.useEffect(() => {
-    profile.uid !== "x" && setFormData((prev) => ({ ...prev, forename: profile.forename, surname: profile.surname, city: profile.city, street: profile.street, postcode: profile.postcode }));
+    profile.uid !== "x" && setFormData((prev) => ({ ...prev, forename: profile.forename, surname: profile.surname, phone: profile.phone, street: profile.street, city: profile.city, postcode: profile.postcode }));
   }, [profile]);
 
   function changeForm(type, value) {
@@ -22,6 +23,15 @@ export default function Account() {
     if (!name) return ""; // Handle the case where the input might be empty or null
     return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
   }
+
+  const location = useLocation();
+  const targetRef = useRef(null);
+
+  useEffect(() => {
+    if (location.hash === "#orders") {
+      targetRef.current.scrollIntoView();
+    }
+  }, [location]);
 
   return (
     <div className="mt-10 flex flex-col items-center">
@@ -84,7 +94,9 @@ export default function Account() {
       )}
       {logged && (
         <div className="flex flex-col items-center">
-          <Orders />
+          <section id="orders" ref={targetRef}>
+            <Orders />
+          </section>
           <button
             className="button__normal button__negative mt-10"
             onClick={() => {

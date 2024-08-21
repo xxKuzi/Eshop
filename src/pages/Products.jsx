@@ -5,8 +5,7 @@ import Footer from "../parts/Footer.jsx";
 import { useLocation } from "react-router-dom";
 
 export default function Products() {
-  const { catalog, addToCart, addToLocalCart, refreshCatalog } = useData();
-  const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
+  const { catalog, addToCart } = useData();
 
   const allProducts = catalog.map((item) => {
     return <Card key={item.id} name={item.name} price={item.price} images={item.images} id={item.id} handleAddToCart={() => addToCart(item.id, 1)} />;
@@ -19,7 +18,7 @@ export default function Products() {
       <div className="flex items-center">
         {filteredCatalog.map((selectedItem, index) => (
           <div className="flex items-center" key={selectedItem.id}>
-            <Card name={selectedItem.name} price={selectedItem.price} images={selectedItem.images} id={selectedItem.id} handleAddToCart={() => (logged ? addToCart(selectedItem.id, 1) : (addToLocalCart(selectedItem.id, 1), refreshCatalog()))} />
+            <Card name={selectedItem.name} price={selectedItem.price} images={selectedItem.images} id={selectedItem.id} handleAddToCart={() => addToCart(selectedItem.id, 1)} />
             {index !== filteredCatalog.length - 1 && <div className="mx-7 h-[250px] w-[2px] rounded bg-gray-300"></div>}
           </div>
         ))}

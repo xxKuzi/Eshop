@@ -170,6 +170,8 @@ export default function LogIn(props) {
           postcode: "",
           deliveryKind: "",
           packetaAddress: "",
+          changes: [],
+          orders: [],
         });
         console.log("CREATING NEW PROFILE");
       } else {
@@ -183,6 +185,7 @@ export default function LogIn(props) {
 
     localStorage.removeItem("details");
     localStorage.removeItem("cart");
+    localStorage.removeItem("inPayment");
 
     successful();
 

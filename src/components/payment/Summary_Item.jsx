@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useData } from "../../parts/Memory.jsx";
 
-export default function Cart_Item(props) {
-  let { addToCart, addToLocalCart, refreshCatalog } = useData();
+export default function Summary_Item(props) {
   let { id, name, price, images, quantity } = props.data;
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 

@@ -69,7 +69,7 @@ export default function DevOrders() {
               </div>
               <p>final price: {data.reduce((sum, item) => sum + item.price * item.quantity, 0)}</p>
               <div className="flex flex-col items-center justify-center">
-                <p className={"font-bold " + (order.state === "success" ? "text-green-500" : "text-red-600")}>{order.state}</p>
+                <p className={"font-bold " + (order.paymentState === "paid" ? "text-green-500" : "text-red-600")}>{order.paymentState}</p>
                 <p>Payment id:</p>
               </div>
             </div>
