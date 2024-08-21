@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-export default function PaymentSuccess() {
+export default function Payment_Success() {
   return (
     <div className="flex justify-center">
       <div className="mt-32 flex flex-col items-center rounded-lg border-2 p-8" style={{ borderColor: "rgba(70, 156, 248, 0.3)" }}>

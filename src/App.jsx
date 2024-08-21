@@ -13,8 +13,8 @@ import Dev from "./dev/Dev.jsx";
 import Delivery from "./pages/payment/Delivery.jsx";
 import Summary from "./pages/payment/Summary.jsx";
 import Details from "./pages/payment/Details.jsx";
-import Success from "./components/payment/PaymentSuccess.jsx";
-import Cancel from "./components/payment/PaymentCancel.jsx";
+import Success from "./components/payment/Payment_Success.jsx";
+import Cancel from "./components/payment/Payment_Cancel.jsx";
 
 import { Routes, Route } from "react-router-dom";
 import { Memory, useData } from "./parts/Memory.jsx";

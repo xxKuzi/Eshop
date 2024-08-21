@@ -14,7 +14,7 @@ export default function Dev() {
 
   return (
     <div>
-      <p>Editor {editor.toString()}</p>
+      <p>Editor {editor ? editor.toString() : "false"}</p>
       {!editor && <input value={text} className="rounded-md border-2 bg-gray-100" onChange={(e) => (setText(e.target.value), e.target.value === "tm" ? (setText(""), logged ? updateProfile("editor", true) : null) : null)} type="text"></input>}
       {editor && (
         <div className="flex flex-col">

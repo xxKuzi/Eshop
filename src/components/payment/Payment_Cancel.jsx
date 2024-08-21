@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-export default function PaymentCancel() {
+export default function Payment_Cancel() {
   return (
     <div className="flex justify-center">
       <div className="mt-32 flex flex-col items-center rounded-lg border-2 border-red-200 p-8">

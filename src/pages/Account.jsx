@@ -28,7 +28,7 @@ export default function Account() {
   const targetRef = useRef(null);
 
   useEffect(() => {
-    if (location.hash === "#orders") {
+    if (location.hash === "#orders" && targetRef.current) {
       targetRef.current.scrollIntoView();
     }
   }, [location]);

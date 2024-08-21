@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Packeta from "../../components/payment/Packeta.jsx";
 import { IoIosArrowRoundBack } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import { useData } from "../../parts/Memory";
