@@ -70,10 +70,6 @@
     @apply rounded-lg border border-blue-500 px-3 text-center;
   }
 
-  .button {
-    @apply cursor-pointer;
-  }
-
   .button__big {
     @apply rounded-lg px-8 py-6;
   }

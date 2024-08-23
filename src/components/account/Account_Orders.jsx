@@ -85,7 +85,10 @@ export default function Account_Orders() {
                   </div>
                   <div className="flex w-[200px] justify-between">
                     <p className="mr-8 w-[60px] text-end font-semibold">{order.products.reduce((sum, product) => sum + product.price * product.quantity, 0) + "Kč"}</p>
-                    <p className={"w-[100px] text-center font-bold " + (order.paymentState === "paid" ? "text-green-500" : order.paymentState === "pending" ? "text-yellow-500" : "text-red-600")}>{showStatus(order.paymentState)}</p>
+                    <div className="w-[100px]">
+                      <p className={"w-[100px] text-center font-bold " + (order.paymentState === "paid" ? "text-green-500" : order.paymentState === "pending" ? "text-yellow-500" : "text-red-600")}>{showStatus(order.paymentState)}</p>
+                      <button className="button__small button__positive mt-2">Zaplatit</button>
+                    </div>
                   </div>
                 </div>
               ))}
