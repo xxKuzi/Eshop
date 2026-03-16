@@ -41,7 +41,8 @@
     "vite": "^5.1.4"
   },
   "overrides": {
-    "glob": "^10.5.0"
+    "glob": "^10.5.0",
+    "undici": "^6.24.0"
   },
   "proxy": "http://localhost:4242"
 }
