@@ -42,7 +42,8 @@
   },
   "overrides": {
     "glob": "^10.5.0",
-    "undici": "^6.24.0"
+    "undici": "^6.24.0",
+    "esbuild": "^0.25.0"
   },
   "proxy": "http://localhost:4242"
 }
