@@ -10,18 +10,84 @@ export default function Account() {
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
   const [loginSwitch, setLoginSwitch] = useState(true);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    forename: "",
+    surname: "",
+    phone: "",
+    street: "",
+    city: "",
+    postcode: ""
+  });
+  const [errors, setErrors] = useState({});
 
   React.useEffect(() => {
-    profile.uid !== "x" && setFormData((prev) => ({ ...prev, forename: profile.forename, surname: profile.surname, phone: profile.phone, street: profile.street, city: profile.city, postcode: profile.postcode }));
+    if (profile.uid !== "x" && profile.uid !== "") {
+      setFormData({
+        forename: profile.forename || "",
+        surname: profile.surname || "",
+        phone: profile.phone || "",
+        street: profile.street || "",
+        city: profile.city || "",
+        postcode: profile.postcode || ""
+      });
+    }
   }, [profile]);
 
   function changeForm(type, value) {
     setFormData((prev) => ({ ...prev, [type]: value }));
+    if (errors[type]) {
+      setErrors((prev) => ({ ...prev, [type]: null }));
+    }
   }
+
   function capitalize(name) {
     if (!name) return ""; // Handle the case where the input might be empty or null
     return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  }
+
+  function validate() {
+    let tempErrors = {};
+    if (!formData.forename || formData.forename.trim() === "") {
+      tempErrors.forename = "Jméno je povinné";
+    }
+    if (!formData.surname || formData.surname.trim() === "") {
+      tempErrors.surname = "Příjmení je povinné";
+    }
+    if (!formData.phone || formData.phone.trim() === "") {
+      tempErrors.phone = "Telefon je povinný";
+    } else {
+      const cleanPhone = formData.phone.replace(/\s+/g, "");
+      if (!/^\+?[0-9]{9,15}$/.test(cleanPhone)) {
+        tempErrors.phone = "Neplatný formát (9 až 15 číslic)";
+      }
+    }
+    if (!formData.street || formData.street.trim() === "") {
+      tempErrors.street = "Ulice je povinná";
+    }
+    if (!formData.city || formData.city.trim() === "") {
+      tempErrors.city = "Město je povinné";
+    }
+    if (!formData.postcode || formData.postcode.trim() === "") {
+      tempErrors.postcode = "PSČ je povinné";
+    } else {
+      const cleanPostcode = formData.postcode.replace(/\s+/g, "");
+      if (!/^[0-9]{5}$/.test(cleanPostcode)) {
+        tempErrors.postcode = "Neplatné PSČ (5 číslic)";
+      }
+    }
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  }
+
+  function handleSave() {
+    if (!validate()) {
+      return;
+    }
+    updateAndRecordProfile({
+      ...formData,
+      surname: capitalize(formData.surname),
+      forename: capitalize(formData.forename)
+    });
   }
 
   const location = useLocation();
@@ -58,36 +124,54 @@ export default function Account() {
           </div>
           <div className="mx-7 mt-8 h-[2px] w-[350px] rounded bg-gray-300"></div>
           <p className="headline__small mt-8">Změnit údaje</p>
-          <div className="relative mt-6 flex items-center gap-10">
-            <p className="absolute -left-[85px] ">Jméno</p>
-            <input className="input-normal input" name="forename" type="text" value={formData.forename} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+          <div className="relative mt-6 flex items-start gap-10">
+            <p className="absolute -left-[85px] top-2">Jméno</p>
+            <div className="flex flex-col">
+              <input className={`input__normal input ${errors.forename ? "border-red-500 focus:border-red-500" : ""}`} name="forename" type="text" value={formData.forename} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+              {errors.forename && <p className="text-red-500 text-xs mt-1 w-72 text-left">{errors.forename}</p>}
+            </div>
           </div>
-          <div className="relative mt-6 flex items-center gap-10">
-            <p className="absolute -left-[85px]">Příjmení</p>
-            <input className="input-normal input" name="surname" type="text" value={formData.surname} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
-          </div>
-
-          <div className="relative mt-6 flex items-center gap-10">
-            <p className="absolute -left-[85px]">Telefon</p>
-            <input className="input-normal input" name="phone" type="text" value={formData.phone} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
-          </div>
-
-          <div className="relative mt-6 flex items-center gap-10">
-            <p className="absolute -left-[85px]">Ulice</p>
-            <input className="input-normal input" name="street" type="text" value={formData.street} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+          <div className="relative mt-6 flex items-start gap-10">
+            <p className="absolute -left-[85px] top-2">Příjmení</p>
+            <div className="flex flex-col">
+              <input className={`input__normal input ${errors.surname ? "border-red-500 focus:border-red-500" : ""}`} name="surname" type="text" value={formData.surname} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+              {errors.surname && <p className="text-red-500 text-xs mt-1 w-72 text-left">{errors.surname}</p>}
+            </div>
           </div>
 
-          <div className="relative mt-6 flex items-center gap-10">
-            <p className="absolute -left-[85px]">Město</p>
-            <input className="input-normal input" name="city" type="text" value={formData.city} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+          <div className="relative mt-6 flex items-start gap-10">
+            <p className="absolute -left-[85px] top-2">Telefon</p>
+            <div className="flex flex-col">
+              <input className={`input__normal input ${errors.phone ? "border-red-500 focus:border-red-500" : ""}`} name="phone" type="text" value={formData.phone} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+              {errors.phone && <p className="text-red-500 text-xs mt-1 w-72 text-left">{errors.phone}</p>}
+            </div>
           </div>
 
-          <div className="relative mt-6 flex items-center gap-10">
-            <p className="absolute -left-[85px]">PSČ</p>
-            <input className="input-normal input" name="postcode" type="text" value={formData.postcode} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+          <div className="relative mt-6 flex items-start gap-10">
+            <p className="absolute -left-[85px] top-2">Ulice</p>
+            <div className="flex flex-col">
+              <input className={`input__normal input ${errors.street ? "border-red-500 focus:border-red-500" : ""}`} name="street" type="text" value={formData.street} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+              {errors.street && <p className="text-red-500 text-xs mt-1 w-72 text-left">{errors.street}</p>}
+            </div>
           </div>
 
-          <button className="button__small button__submit mt-8" onClick={() => updateAndRecordProfile({ ...formData, surname: capitalize(formData.surname), forename: capitalize(formData.forename) })}>
+          <div className="relative mt-6 flex items-start gap-10">
+            <p className="absolute -left-[85px] top-2">Město</p>
+            <div className="flex flex-col">
+              <input className={`input__normal input ${errors.city ? "border-red-500 focus:border-red-500" : ""}`} name="city" type="text" value={formData.city} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+              {errors.city && <p className="text-red-500 text-xs mt-1 w-72 text-left">{errors.city}</p>}
+            </div>
+          </div>
+
+          <div className="relative mt-6 flex items-start gap-10">
+            <p className="absolute -left-[85px] top-2">PSČ</p>
+            <div className="flex flex-col">
+              <input className={`input__normal input ${errors.postcode ? "border-red-500 focus:border-red-500" : ""}`} name="postcode" type="text" value={formData.postcode} onChange={(e) => changeForm(e.target.name, e.target.value)}></input>
+              {errors.postcode && <p className="text-red-500 text-xs mt-1 w-72 text-left">{errors.postcode}</p>}
+            </div>
+          </div>
+
+          <button className="button__small button__submit mt-8" onClick={handleSave}>
             Uložit změny
           </button>
         </div>

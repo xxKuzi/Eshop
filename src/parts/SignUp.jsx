@@ -3,10 +3,11 @@ import { useState } from "react";
 import { auth, provider, db } from "./Base";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { collection, getDocs, addDoc } from "firebase/firestore";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 export default function SignUp(props) {
   //#region --- --- --- --- --- --- --- --- --- --- INITIALIZATION --- --- --- --- --- --- --- --- --- ---
-
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     forename: "",
     surname: "",
@@ -54,6 +55,12 @@ export default function SignUp(props) {
       state: false,
       message: "Emailová adresa musí být zapsána pouze malými písmeny",
     },
+    {
+      id: 7,
+      name: "badPhone",
+      state: false,
+      message: "Zadejte prosím platný telefon (9 až 15 číslic)",
+    },
   ]);
   const [errorMessage, setErrorMessage] = useState();
 
@@ -74,8 +81,8 @@ export default function SignUp(props) {
     formData.email.split("").some((char) => !specialCharacters.includes(char) && char.toUpperCase() === char) ? changeError(6, true) : changeError(6, false);
 
     let empty = false;
-    Object.values(formData).forEach((value) => {
-      if (value === "") {
+    Object.keys(formData).forEach((key) => {
+      if (key !== "newspaper" && formData[key] === "") {
         empty = true;
       }
     });
@@ -91,7 +98,12 @@ export default function SignUp(props) {
   //After formData UPDATE
   React.useEffect(() => {
     //ON
-    !formData.email.includes("@") && formData.email !== "" && formData.phone !== "" ? changeError(2, true) : changeError(2, false);
+    const isEmailValid = formData.email === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+    changeError(2, !isEmailValid);
+
+    const cleanPhone = formData.phone.replace(/\s+/g, "");
+    const isPhoneValid = formData.phone === "" || /^\+?[0-9]{9,15}$/.test(cleanPhone);
+    changeError(7, !isPhoneValid);
 
     //OFF
     formData.password.length >= 6 ? changeError(4, false) : null;
@@ -132,13 +144,21 @@ export default function SignUp(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const { email, password } = formData;
+    const { email, password, phone } = formData;
 
-    password.length < 6 ? changeError(4, true) : changeError(4, false);
+    const isPasswordValid = password.length >= 6;
+    changeError(4, !isPasswordValid);
+
+    const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    changeError(2, !isEmailValid);
+
+    const cleanPhone = phone.replace(/\s+/g, "");
+    const isPhoneValid = /^\+?[0-9]{9,15}$/.test(cleanPhone);
+    changeError(7, !isPhoneValid);
 
     let empty = false;
-    Object.values(formData).forEach((item) => {
-      if (item === "") {
+    Object.keys(formData).forEach((key) => {
+      if (key !== "newspaper" && formData[key] === "") {
         empty = true;
       }
     });
@@ -148,13 +168,13 @@ export default function SignUp(props) {
       changeError(3, false);
     }
 
-    let errorTrue = false;
-    errorStorage.forEach((item) => {
-      item.state === true ? (errorTrue = true) : null;
-    });
+    const specialCharacters = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "=", "{", "}", "[", "]", "|", "\\", ";", ":", "'", '"', "<", ">", ",", ".", "/", "?", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    const hasUpperCase = email.split("").some((char) => !specialCharacters.includes(char) && char.toUpperCase() === char);
 
-    if (errorTrue || password.length < 6 || empty) {
-      console.log("RETURNING");
+    const errorTrue = !isPasswordValid || !isEmailValid || !isPhoneValid || empty || hasUpperCase || errorStorage.some(item => item.id !== 2 && item.id !== 3 && item.id !== 4 && item.id !== 7 && item.state === true);
+
+    if (errorTrue) {
+      console.log("RETURNING DUE TO VALIDATION ERRORS");
       return;
     }
     createUserWithEmailAndPassword(auth, email, password)
@@ -265,7 +285,12 @@ export default function SignUp(props) {
         <input type="text" className="input__normal input" name="surname" placeholder="Příjmení" value={formData.surname} onChange={handleChange} />
         <input type="text" className="input__normal input" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
         <input type="text" className="input__normal input" name="phone" placeholder="Telefon" value={formData.phone} onChange={handleChange} />
-        <input type="text" className="input__normal input" name="password" placeholder="Heslo" value={formData.password} onChange={handleChange} />
+        <div className="relative mt-2">
+          <input type={showPassword ? "text" : "password"} className="input__normal input !mt-0 pr-10" name="password" placeholder="Heslo" value={formData.password} onChange={handleChange} />
+          <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <IoMdEyeOff size={20} /> : <IoMdEye size={20} />}
+          </button>
+        </div>
         <div className="marketing">
           <input id="newspaper" className="mr-2 mt-2" type="checkbox" name="newspaper" onChange={handleChange} checked={formData.newspaper} />
           <label htmlFor="newspaper" className="font-normal">

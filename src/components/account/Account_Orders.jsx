@@ -19,6 +19,24 @@ export default function Account_Orders() {
       const ordersArr = ordersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       const filteredOrders = ordersArr.filter((order) => order.uid === profile.uid);
 
+      filteredOrders.sort((a, b) => {
+        if (profile.orders && Array.isArray(profile.orders)) {
+          const indexA = profile.orders.indexOf(a.id);
+          const indexB = profile.orders.indexOf(b.id);
+          if (indexA !== -1 || indexB !== -1) {
+            return indexB - indexA;
+          }
+        }
+        const parseDate = (val) => {
+          if (!val) return new Date(0);
+          if (val.seconds) return new Date(val.seconds * 1000);
+          if (typeof val.toDate === "function") return val.toDate();
+          const d = new Date(val);
+          return isNaN(d.getTime()) ? new Date(0) : d;
+        };
+        return parseDate(b.createdAt) - parseDate(a.createdAt);
+      });
+
       let dataArr = filteredOrders.map((order) => {
         const productsWithDetails = order.products
           .map((product) => {
@@ -35,7 +53,7 @@ export default function Account_Orders() {
     }
 
     loadOrders();
-  }, [profile.uid, catalog]);
+  }, [profile.uid, JSON.stringify(profile.orders), catalog]);
 
   function showStatus(state) {
     let status = "";

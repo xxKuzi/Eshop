@@ -65,7 +65,7 @@ export default function Payment_Form() {
       let sessionId = response.data.id;
       await addOrderToProfile(sessionId);
 
-      await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: profile.inPayment, uid: profile.uid });
+      await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: profile.inPayment, uid: profile.uid, createdAt: new Date().toISOString() });
       CheckArrayEquality(profile.cart, profile.inPayment) ? await updateProfile("cart", []) : null;
       await stripe.redirectToCheckout({ sessionId: sessionId });
     } else {
@@ -84,7 +84,7 @@ export default function Payment_Form() {
       const response = await paymentFunction(paymentItems);
       let sessionId = response.data.id;
 
-      await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: inPayment, uid: "unregistred" });
+      await setDoc(doc(collection(db, "orders"), sessionId), { ...form, products: inPayment, uid: "unregistred", createdAt: new Date().toISOString() });
       let cart = JSON.parse(localStorage.getItem("cart"));
       CheckArrayEquality(cart, inPayment) ? localStorage.setItem("cart", JSON.stringify([])) : null;
       await stripe.redirectToCheckout({ sessionId: sessionId });

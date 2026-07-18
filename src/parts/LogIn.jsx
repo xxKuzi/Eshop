@@ -3,10 +3,12 @@ import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, provider, db } from "./Base";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useData } from "./Memory";
+import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 
 export default function LogIn(props) {
   //#region --- --- --- --- --- --- --- --- --- --- INITIALIZATION --- --- --- --- --- --- --- --- --- ---
   const { addToCart } = useData();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -204,7 +206,12 @@ export default function LogIn(props) {
         <div className="container">
           <h1 className="headline mt-3">Přihlášení</h1>
           <input type="text" className="input__normal input mt-5" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
-          <input type="text" className="input__normal input" name="password" placeholder="Heslo" value={formData.password} onChange={handleChange} />
+          <div className="relative mt-2">
+            <input type={showPassword ? "text" : "password"} className="input__normal input !mt-0 pr-10" name="password" placeholder="Heslo" value={formData.password} onChange={handleChange} />
+            <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700" onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <IoMdEyeOff size={20} /> : <IoMdEye size={20} />}
+            </button>
+          </div>
 
           <p className={`error bold mt-4 ${errorStorage[0].state ? "text-green-500" : "text-red-600"}`}>{errorMessage}</p>
 
