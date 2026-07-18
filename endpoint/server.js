@@ -1,5 +1,5 @@
 // This example uses Express to receive webhooks
-const express = require("express");
+import express from "express";
 const app = express();
 
 // Match the raw body to content type application/json

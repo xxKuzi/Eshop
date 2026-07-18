@@ -35,6 +35,36 @@ export const Memory = ({ children }) => {
   };
   const [catalog, setCatalog] = useState([emptyProduct]);
   const [profile, setProfile] = useState(emptyProfile);
+  
+  let emptyBlog = {
+    id: 0,
+    title: "",
+    summary: "",
+    content: "",
+    date: "",
+    image: "wide.jpg",
+  };
+  const [blogs, setBlogs] = useState([emptyBlog]);
+
+  const defaultBlogs = [
+    {
+      id: 0,
+      title: "Jak vybrat správné sportovní brýle",
+      summary: "Vybrat ty správné brýle na běh, kolo nebo vysokohorskou turistiku může být oříšek. Připravili jsme pro vás přehledný návod, na co se zaměřit.",
+      content: "Při výběru sportovních brýlí je nejdůležitější se zaměřit na tři hlavní aspekty: ochranu, pohodlí a optické vlastnosti čoček.\n\n1. Ochrana očí: Brýle by měly mít 100% filtr proti UV záření (UVA i UVB). Dále by měly být vyrobeny z odolných materiálů, jako je polykarbonát nebo Grilamid TR90, které se při nárazu netříští.\n\n2. Pohodlí a usazení na obličeji: Brýle nesmí při pohybu sklouzávat ani tlačit na spáncích či za ušima. Pomoci mohou nastavitelné nosníky a pogumované nožičky.\n\n3. Světelné filtry a zabarvení: Pro různé sporty se hodí různé kategorie filtrů (od 0 do 4). Pro cyklistiku v lese doporučujeme fotochromatické čočky, které mění zatmavení podle intenzity světla.",
+      date: "18. 07. 2026",
+      image: "wide.jpg",
+    },
+    {
+      id: 1,
+      title: "Proč jsou polarizační brýle nutností pro řidiče a sportovce",
+      summary: "Polarizační brýle nejsou jen módním doplňkem. Zjistěte, jak fungují, proč chrání váš zrak před oslněním a proč by neměly chybět v žádné výbavě.",
+      content: "Polarizace je skvělý pomocník pro každého řidiče i milovníka outdoorových aktivit. Standardní sluneční brýle pouze ztmavují scénu, ale neodstraňují nepříjemné odlesky od vodorovných ploch (mokrá silnice, kapota auta, vodní hladina nebo sníh).\n\nPolarizační filtr propouští pouze užitečné vertikální světlo a blokuje oslňující horizontální odlesky. Výsledkem je výrazně ostřejší vidění, sytější barvy a eliminace únavy očí při dlouhém řízení nebo sportování. Investice do polarizačních brýlí je investicí do vašeho zraku a bezpečnosti.",
+      date: "17. 07. 2026",
+      image: "black.png",
+    }
+  ];
+
   const logged = localStorage.getItem("uid") !== "x" && localStorage.getItem("uid") !== "" && localStorage.getItem("uid") !== null;
 
   const key = useRef("");
@@ -46,6 +76,7 @@ export const Memory = ({ children }) => {
   useEffect(() => {
     loadProfile();
     loadCatalog();
+    loadBlogs();
   }, []);
 
   useEffect(() => {
@@ -114,6 +145,61 @@ export const Memory = ({ children }) => {
     let querySnapshot = await getDocs(collection(db, "catalog"));
     let dataObject = querySnapshot.docs.map((doc) => doc.data());
     dataObject.length !== 0 ? setCatalog(dataObject) : setCatalog([emptyProduct]);
+  };
+
+  const loadBlogs = async () => {
+    try {
+      let querySnapshot = await getDocs(collection(db, "blogs"));
+      let dataObject = querySnapshot.docs.map((doc) => doc.data());
+      if (dataObject.length !== 0) {
+        dataObject.sort((a, b) => a.id - b.id);
+        setBlogs(dataObject);
+      } else {
+        for (const blog of defaultBlogs) {
+          await addDoc(collection(db, "blogs"), blog);
+        }
+        setBlogs(defaultBlogs);
+      }
+    } catch (e) {
+      console.error("Error loading blogs from Firebase:", e);
+      setBlogs(defaultBlogs);
+    }
+  };
+
+  const addToBlogs = async ({ title, summary, content, image }) => {
+    const nextId = blogs.length > 0 ? Math.max(...blogs.map(b => b.id)) + 1 : 0;
+    const newBlog = {
+      id: nextId,
+      title,
+      summary,
+      content,
+      image: image || "wide.jpg",
+      date: new Date().toLocaleDateString("cs-CZ"),
+    };
+    await addDoc(collection(db, "blogs"), newBlog);
+    await loadBlogs();
+  };
+
+  const deleteFromBlogs = async (id) => {
+    let querySnapshot = await getDocs(collection(db, "blogs"));
+    let found = false;
+    for (const d of querySnapshot.docs) {
+      if (d.data().id === id) {
+        await deleteDoc(doc(db, "blogs", d.id));
+        found = true;
+      }
+    }
+    await loadBlogs();
+  };
+
+  const updateBlog = async (id, updatedData) => {
+    let querySnapshot = await getDocs(collection(db, "blogs"));
+    for (const d of querySnapshot.docs) {
+      if (d.data().id === id) {
+        await setDoc(doc(db, "blogs", d.id), { ...d.data(), ...updatedData });
+      }
+    }
+    await loadBlogs();
   };
 
   const updateDb = async (type, tempValue) => {
@@ -425,6 +511,10 @@ export const Memory = ({ children }) => {
     addOrderToProfile,
     updateAndRecordProfile,
     emptyProfile,
+    blogs,
+    addToBlogs,
+    deleteFromBlogs,
+    updateBlog,
   };
 
   return <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>;

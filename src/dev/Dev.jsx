@@ -3,6 +3,7 @@ import { useData } from "../parts/Memory";
 import DevProducts from "./DevProducts";
 import DevImages from "./DevImages.jsx";
 import DevOrders from "./DevOrders.jsx";
+import DevBlogs from "./DevBlogs.jsx";
 
 export default function Dev() {
   const { profile } = useData();
@@ -26,6 +27,7 @@ export default function Dev() {
 
           <DevProducts className="mb-5" setSelected={(value) => setSelected(value)} selected={selected} />
           <DevImages selected={selected} />
+          <DevBlogs />
           <DevOrders />
         </div>
       )}

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -7,22 +8,25 @@ export default function Footer() {
         <img className="h-[60px] rounded-lg bg-white" src="logo.png" />
       </div>
 
-      <div className=" flex w-64 items-center justify-center gap-8 text-nowrap text-white">
-        <a className="hover:underline" href="/">
+      <div className=" flex w-64 items-center justify-center gap-6 text-nowrap text-white">
+        <Link className="hover:underline" to="/">
           Domů
-        </a>
-        <a className="hover:underline" href="/products">
+        </Link>
+        <Link className="hover:underline" to="/products">
           Produkty
-        </a>
-        <a className="hover:underline" href="/about us">
+        </Link>
+        <Link className="hover:underline" to="/blog">
+          Blog
+        </Link>
+        <Link className="hover:underline" to="/about-us">
           O nás
-        </a>
-        <a className="hover:underline" href="/cart">
+        </Link>
+        <Link className="hover:underline" to="/cart">
           Košík
-        </a>
-        <a className="hover:underline" href="/dev">
+        </Link>
+        <Link className="hover:underline" to="/dev">
           Develop
-        </a>
+        </Link>
       </div>
       <div className="flex w-64 justify-end">
         <p className="mr-1 font-bold text-white">TohleChces.cz</p>
